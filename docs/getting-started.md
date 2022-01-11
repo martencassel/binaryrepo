@@ -7,7 +7,7 @@ make build
 
 # Run the server
 
-The server is listening on address http://localalhost:8081
+The server is listening on address http://localhost:8081
 
 ```
 ./binaryrepo
