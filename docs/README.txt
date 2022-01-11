@@ -1,1 +1,34 @@
 Here goes docs.
+
+Problem
+
+    1. Unit testing an API client in golang.
+
+    2. Who have implemented Docker Registry V2 api clients ?
+        1. https://github.com/genuinetools/reg
+        2. https://github.com/heroku/docker-registry-client
+
+    3. Docker remote proxy
+
+        Is a http handler that uses a Docker Registry V2 client
+        to proxy requests to/from the upstream registry server to a local client that talks
+        to the proxy server.
+
+Docker Remote caching
+
+    1. Must support Docker Registry v2
+    2. Must only perform pull operations
+    3. Must support all major Docker Registries in the cloud
+    4. Must handle authentication
+    5. Must be testable
+
+  <-----------          Docker Registry API v2      <--------------  Docker HUB
+
+                                                    <--------------  Azure ACR
+
+                                                    <--------------  Google GCR
+
+                                                    <--------------  AWS ECR
+
+
+
