@@ -51,7 +51,7 @@ func PrintOptions(req *http.Request, opt HandlerOptions) {
 	log.Printf("Repo Name: %s, Namespace: %s, Digest: %s, Namespace 1: %s, Namespace 2: %s", opt.repoName, opt.namespace, opt.digest, opt.namespace1, opt.namespace2)
 }
 
-func (p *DockerProxyApp) GetBlobHandler(w http.ResponseWriter, req *http.Request) {
+func (p *DockerProxyApp) DownloadLayer(w http.ResponseWriter, req *http.Request) {
 	log.Printf("%s %s", req.Method, req.URL.Path)
 	opt := GetOptions(req)
 	if opt.repoName == "" {

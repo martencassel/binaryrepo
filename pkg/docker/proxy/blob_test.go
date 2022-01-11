@@ -44,7 +44,7 @@ func TestGetBlobNotInCache(t *testing.T) {
 		"digest":    d,
 	}
 	req = mux.SetURLVars(req, vars)
-	p.GetBlobHandler(rec, req)
+	p.DownloadLayer(rec, req)
 	res := rec.Result()
 	assert.Equal(t, http.StatusTemporaryRedirect, res.StatusCode)
 	assert.Equal(t, "/repo/docker-remote/v2/blob/sha256:7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631", res.Header.Get("Location"))
@@ -76,7 +76,7 @@ func TestGetBlobInCache(t *testing.T) {
 		"digest":    d,
 	}
 	req = mux.SetURLVars(req, vars)
-	p.GetBlobHandler(rec, req)
+	p.DownloadLayer(rec, req)
 	res := rec.Result()
 	b, err = ioutil.ReadAll(res.Body)
 	if err != nil {
