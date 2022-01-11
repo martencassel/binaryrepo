@@ -31,3 +31,6 @@ check-unit:
 cover:
 	go test ./... -cover
 
+.PHONY: run
+run: binaryrepo
+	./binaryrepo
