@@ -1,1 +1,0 @@
-{"errors":[{"code":"UNAUTHORIZED","message":"authentication required","detail":[{"Type":"repository","Class":"","Name":"library/redis","Action":"pull"}]}]}
