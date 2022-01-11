@@ -17,8 +17,15 @@ func NewFileStore(basePath string) *FileStore {
 	fs := &FileStore{
 		BasePath: basePath,
 	}
-	os.MkdirAll(basePath, 0755)
-	os.MkdirAll(basePath+"/uploads", 0755)
+	err := os.MkdirAll(basePath, 0755)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = os.MkdirAll(basePath+"/uploads", 0755)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return fs
 }
 

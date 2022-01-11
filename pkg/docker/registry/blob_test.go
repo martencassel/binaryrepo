@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -58,7 +59,10 @@ func TestBlob(t *testing.T) {
 		registry := NewDockerRegistry(fs, index)
 		uuid := uuid.New().String()
 		uploadPath := fmt.Sprintf("/tmp/filestore/uploads/%s", uuid)
-		ioutil.WriteFile(uploadPath, []byte(""), 0644)
+		err := ioutil.WriteFile(uploadPath, []byte(""), 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
 		blob, err := ioutil.ReadFile("./testdata/7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631.json")
 		if err != nil {
 			t.Fatal(err)

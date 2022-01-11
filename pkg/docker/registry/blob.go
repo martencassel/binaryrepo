@@ -27,7 +27,12 @@ func (registry *DockerRegistry) InitBlobUpload(rw http.ResponseWriter, r *http.R
 	}
 	log.Printf("%s /v2/%s/blobs/uploads", http.MethodPost, name)
 	uuid, _ := uuid.NewUUID()
-	ioutil.WriteFile(fmt.Sprintf("%s/uploads/%s", registry.fs.BasePath, uuid.String()), []byte{}, 0644)
+	err := ioutil.WriteFile(fmt.Sprintf("%s/uploads/%s", registry.fs.BasePath, uuid.String()), []byte{}, 0644)
+	if err != nil {
+		log.Fatal(err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	loc := fmt.Sprintf("/repo/%s/v2/%s/blobs/uploads/%s", repoName, name, uuid)
 	rw.Header().Set("Content-Length", "0")
 	rw.Header().Set("docker-distribution-api-version", "registry/2.0")

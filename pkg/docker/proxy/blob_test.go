@@ -34,7 +34,10 @@ func TestGetBlobNotInCache(t *testing.T) {
 		PkgType: repo.Docker,
 		URL:     "https://registry-1.docker.io",
 	})
-	p.fs.Remove(digest)
+	err = p.fs.Remove(digest)
+	if err != nil {
+		t.Fatal(err)
+	}
 	vars := map[string]string{
 		"repo-name": "docker-remote",
 		"namespace": "redis",
@@ -48,7 +51,10 @@ func TestGetBlobNotInCache(t *testing.T) {
 }
 
 func TestGetBlobInCache(t *testing.T) {
-	os.MkdirAll("/tmp/filestore/13/", 0777)
+	err := os.MkdirAll("/tmp/filestore/13/", 0777)
+	if err != nil {
+		t.Fatal(err)
+	}
 	b, err := os.ReadFile("./testdata/1e916e1a28efae8398ab187eaf75683c6c7ebc71e90f780e19a95465dfd52f")
 	if err != nil {
 		t.Fatal(err)

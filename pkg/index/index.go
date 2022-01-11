@@ -16,7 +16,7 @@ func (*FileIndex) Get(reponame string, path string) FileInfo {
 	return FileInfo{}
 }
 
-var files []FileInfo = []FileInfo{
+/*var files []FileInfo = []FileInfo{
 	{
 		ID:       1,
 		RepoKey:  "golang-remote",
@@ -36,3 +36,4 @@ var files []FileInfo = []FileInfo{
 		Checksum: "1590ef6d972aea060ed538e5055d1c9e713eb818f1fac6332bfd4942b64eb825",
 	},
 }
+*/

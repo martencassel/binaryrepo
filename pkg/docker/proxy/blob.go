@@ -80,7 +80,11 @@ func (p *DockerProxyApp) GetBlobHandler(w http.ResponseWriter, req *http.Request
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 		w.Header().Set("Content-Length", strconv.Itoa(len(b)))
-		w.Write(b)
+		_, err = w.Write(b)
+		if err != nil {
+			log.Printf("Error writing to response writer %s", err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 	// If digest does not exist in filestore, then
@@ -139,7 +143,12 @@ func (p *DockerProxyApp) ServeBlobHandler(w http.ResponseWriter, req *http.Reque
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.Write(b)
+		_, err = w.Write(b)
+		if err != nil {
+			log.Printf("Error writing to response writer %s", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		w.Header().Set("Content-Length", strconv.Itoa(len(b)))
 		return
 	}
