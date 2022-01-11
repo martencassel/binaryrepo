@@ -1,0 +1,28 @@
+$ go list -m -versions -json github.com/kelseyhightower/envconfig
+{
+	"Path": "github.com/kelseyhightower/envconfig",
+	"Version": "v1.4.0",
+	"Versions": [
+		"v1.0.0",
+		"v1.1.0",
+		"v1.2.0",
+		"v1.3.0",
+		"v1.4.0"
+	],
+	"Time": "2019-05-24T18:54:28Z",
+	"Indirect": true,
+	"Dir": "/home/marten/pkg/mod/github.com/kelseyhightower/envconfig@v1.4.0",
+	"GoMod": "/home/marten/pkg/mod/cache/download/github.com/kelseyhightower/envconfig/@v/v1.4.0.mod"
+}
+
+
+## List
+curl  http://proxy.golang.org/github.com/kelseyhightower/envconfig/@v/list
+v1.3.0
+v1.0.0
+v1.4.0
+v1.2.0
+v1.1.0
+
+
+# https://github.com/gomods/athens/blob/9b505e9ee0c09e984a9d25d85ba4cd43835e692b/pkg/module/go_vcs_lister.go#L52

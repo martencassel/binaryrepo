@@ -1,0 +1,23 @@
+File is 1000 byte layer file
+Range: bytes=0-0
+GET /v2/<name>/blobs/uploads/<uuid>
+Host: <registry-host>
+204 No Content
+Location : /v2/<name>/blobs/uploads/<uuid>
+Range: bytes=0-<offset>
+Docker-Upload-UUID: <uuid>
+
+* Chunk upload
+Content-Range := start-end
+start := Headers["Content-Range"].Split("-")[0]
+file := open("/tmp/uploads/<uuid>")
+file.seek(start, file.begin)
+Headers["Range] = "0-" + (file.Postition-1) 
+
+* Complete upload
+ranges := Headers["Content-Range].Split("-")
+fs := fs.open("/tmp/uploads/<uuid>")
+fs.seek(ranges[0], fs.begin)
+fs.write(body, len(body))
+
+

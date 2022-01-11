@@ -1,0 +1,63 @@
+Use cases
+1. Proxying a private VCS repos (go get) (GOPRIVATE=gitlab.contoso.com, GONOSUMDB=gitlab.contoso.com)
+2. Proxying proxy.golang.org (proxies multiple vcs) and gosumdb (go get) (GOPROXY=http://localhost:8080)
+3. Proxying a public vcs github.com (go get) (GOPROXY=http://localhost:8080)
+4. Take a directory and package it and upload to http://localhost:8080/local/repo, then use (go get)
+   to fetch packages from it (Package: create .zip, .mod, .info files, upload them).
+
+A handler takes a request and a response writer
+A proxy is a handler that talks to an upstream server and response to the client
+
+What is a go proxy ? 
+
+A web server that responds to the module download protocol, which is a simple API to 
+query and fetch modules. The proxy can also proxy the sumdb protocol.
+
+How to proxy the download protocol ? 
+
+Implement a handler that implement the download protocol.
+The procol will use go mod command to list or fetch files.
+
+How to proxy the sumdb protocol ? 
+
+You can implement it using the httputil.ReverseProxy
+
+
+go get github.com/pkg/errors
+
+1. GET /github.com/pkg/errors/@v/list
+2. <list of available versions>
+3. GET /github.com/pkg/errors/@v/v0.8.0.info
+4. {"Version": "v0.8.0", "Time": ...}
+5. GET /github.com/pkg/errors/@v/v0.8.0.zip
+6. <bytes of zip archive containing module files >      (byte blob application/zip)
+
+1. The list of versions (only if go does not already now which versions it wants)
+2. The module metadata
+3. The go.mod file
+4. The module zip itself
+
+* The download protocol
+
+// List             implements GET /{module}/@v/list
+// Info             implements GET /{module}/@v/{version}.info
+// Latest           implements GET /{module}/@latest
+// GoMod            implements GET /{module}/@v/{version}.mod
+// Zip              implements GET /{module}/@v/{version}.zip
+
+
+// Fetcher fetches modules from an upstream source.
+func Fetch(mod, ver string)
+
+// Downloads the source from the go binary and returns
+// .info, .mod and .zip files. 
+// go mod download -json
+
+// Upstream lister. // go list -m -versions -json
+UpstreamLister
+    List(mod string) []string
+
+    Download
+
+https://roberto.selbach.ca/go-proxies/
+https://go.dev/blog/module-mirror-launch

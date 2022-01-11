@@ -1,0 +1,7 @@
+
+$ curl  http://proxy.golang.org/github.com/kelseyhightower/envconfig/@v/v1.4.0.zip
+
+
+$ ls /home/marten/pkg/mod/cache/download/github.com/kelseyhightower/envconfig/@v/v1.4.0.zip
+
+module github.com/kelseyhightower/envconfig
