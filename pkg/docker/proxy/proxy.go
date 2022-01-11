@@ -35,6 +35,6 @@ func NewReverseProxyDockerHub(upstream string) *ReverseProxyDockerHub {
 	return p
 }
 
-func (p *ReverseProxyDockerHub) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	p.proxy.ServeHTTP(w, req)
+func (p *ReverseProxyDockerHub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	p.proxy.ServeHTTP(w, r)
 }
