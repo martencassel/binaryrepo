@@ -64,7 +64,7 @@ docker rmi -f postgres
 docker rmi -f project.example.com/postgres
 time docker image pull postgres
 
-# Debugging network traffic
+# Debugging network protocols
 
 unset http_proxy
 unset https_proxy
