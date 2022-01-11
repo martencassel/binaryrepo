@@ -54,6 +54,11 @@ func PrintOptions(req *http.Request, opt HandlerOptions) {
 func (p *DockerProxyApp) GetBlobHandler(w http.ResponseWriter, req *http.Request) {
 	log.Printf("%s %s", req.Method, req.URL.Path)
 	opt := GetOptions(req)
+	if opt.repoName == "" {
+		log.Printf("No repo name")
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 	var _repo *repo.Repo
 	if p.index.FindRepo(opt.repoName) == nil {
 		log.Printf("Repo %s was not found", opt.repoName)
@@ -85,6 +90,7 @@ func (p *DockerProxyApp) GetBlobHandler(w http.ResponseWriter, req *http.Request
 	if _repo == nil {
 		log.Printf("Repo %s was not found", opt.repoName)
 		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 	manifestDirector := manifestProxyDirector(opt, "", "registry-1.docker.io")
 	blobModifyResponse := getBlobModifyResponse(p.fs, opt)
