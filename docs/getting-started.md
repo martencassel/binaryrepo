@@ -31,7 +31,7 @@ http://docker-remote.example.com -> http://localhost:8081/repo/docker-remote/v2
 
 In order to start nginx, a local-ca is needed (see the setup-certs.sh script).
 
-cd tools/docker
+cd utils/docker-nginx
 ./start-nginx.sh
 
 Then update /etc/hosts
