@@ -8,7 +8,7 @@ GO ?= go
 golint := $(shell which golangci-lint)
 
 .PHONY: build
-build: binaryrepo
+build: lint binaryrepo
 
 TARGET_OS ?= linux
 
