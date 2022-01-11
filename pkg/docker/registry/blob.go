@@ -2,29 +2,50 @@ package registry
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
-	"strconv"
-	"strings"
 
 	//	"github.com/google/uuid"
 
 	//	"github.com/google/uuid"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"github.com/opencontainers/go-digest"
 )
 
-// PathVersion URL.
+// PathInitBlobUpload URL.
+const PathInitBlobUpload = "/repo/{repo-name}/v2/{name}/blobs/upload"
+
+// Initiate a resumable blob upload.
+// POST /repo/{repo-name}/v2/<name>/blobs/uploads.
+func (registry *DockerRegistry) InitBlobUpload(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	name := vars["name"]
+	repoName := vars["repo-name"]
+	if registry.index.FindRepo(repoName) == nil || name == "" {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	log.Printf("%s /v2/%s/blobs/uploads", http.MethodPost, name)
+	uuid, _ := uuid.NewUUID()
+	ioutil.WriteFile(fmt.Sprintf("%s/uploads/%s", registry.fs.BasePath, uuid.String()), []byte{}, 0644)
+	w.Header().Set("Content-Length", "0")
+	w.Header().Set("docker-distribution-api-version", "registry/2.0")
+	w.Header().Set("Docker-Upload-UUID", uuid.String())
+	w.Header().Set("Range", "0-0")
+	loc := fmt.Sprintf("/repo/%s/v2/%s/blobs/uploads/%s", repoName, name, uuid)
+	w.Header().Set("Location", loc)
+	w.Header().Set("Connection", "close")
+	w.WriteHeader(http.StatusAccepted)
+}
+
+/* PathVersion URL.
 const PathGetBlob = "/repo/{repo-name}/v2/{name}/blobs/{digest}"
 
-/*
+
 	GET /repo/{repo-name}/v2/<name>/blobs/<digest>
 	returns a blob with a digest from a repo.
-*/
+
 func (registry *DockerRegistry) GetBlob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	name := vars["name"]
@@ -61,10 +82,8 @@ func (registry *DockerRegistry) GetBlob(w http.ResponseWriter, r *http.Request) 
 // PathHeadBlob URL.
 const PathHeadBlob = "/repo/{repo-name}/v2/{name}/blobs/{digest}"
 
-/*
 	HEAD /repo/{repo-name}/v2/<name>/blobs/<digest> should return
 	blob length and digest of blob exists, otherwise not found.
-*/
 func (registry *DockerRegistry) HeadBlob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	name := vars["name"]
@@ -96,41 +115,15 @@ func (registry *DockerRegistry) HeadBlob(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusNotFound)
 }
 
-// PathInitBlobUpload URL.
-const PathInitBlobUpload = "/repo/{repo-name}/v2/{name}/blobs/upload"
+*/
 
 /*
-	POST /repo/{repo-name}/v2/<name>/blobs/uploads
-
-	Initiate blob upload, returns location to upload to, and uuid etc.
-*/
-func (registry *DockerRegistry) InitBlobUpload(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	name := vars["name"]
-	repoName := vars["repo-name"]
-	if registry.index.FindRepo(repoName) == nil {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-	log.Printf("%s /v2/%s/blobs/uploads", http.MethodPost, name)
-	uuid, _ := uuid.NewUUID()
-	ioutil.WriteFile(fmt.Sprintf("%s/uploads/%s", registry.fs.BasePath, uuid.String()), []byte{}, 0644)
-	loc := fmt.Sprintf("/repo/%s/v2/%s/blobs/uploads/%s", repoName, name, uuid)
-	w.Header().Set("Location", loc)
-	w.Header().Set("Range", "bytes=0-0")
-	w.Header().Set("Content-Length", "0")
-	w.Header().Set("Docker-Upload-UUID", uuid.String())
-	w.WriteHeader(http.StatusAccepted)
-}
-
 // PathInitBlobUpload URL.
 const PathChunkedBlobUpload = "/repo/{repo-name}/v2/{name}/blobs/uploads/{uuid}"
 
-/*
 	Upload chunk. Append chunk into the uploads directory in the <uuid> file.
 
 	PATCH /repo/<repo-name>/v2/<name>/blobs/uploads/<uuid>
-*/
 func (registry *DockerRegistry) UploadBlobChunk(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	name := vars["name"]
@@ -201,10 +194,9 @@ func (registry *DockerRegistry) UploadBlobChunk(w http.ResponseWriter, r *http.R
 	w.Header().Set("Docker-Upload-UUID", uuid)
 }
 
-/*
 	Completed upload using upload uuid, returns status accepted
 	PUT /v2/<name>/blobs/uploads/<uuid>
-*/
 func (registry *DockerRegistry) CompleteUpload(w http.ResponseWriter, r *http.Request) {
 
 }
+*/

@@ -99,9 +99,7 @@ type Repo struct {
 }
 
 func NewRepoIndex() *RepoIndex {
-	return &RepoIndex{
-		Repos: _repos,
-	}
+	return &RepoIndex{}
 }
 
 func (index *RepoIndex) GetRepos() []Repo {
