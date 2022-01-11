@@ -21,6 +21,7 @@ Docker Remote caching
     3. Must support all major Docker Registries in the cloud
     4. Must handle authentication
     5. Must be testable
+    6. Must support various cli tools (docker-cli, img, buildx)
 
   <-----------          Docker Registry API v2      <--------------  Docker HUB
 
