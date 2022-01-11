@@ -1,69 +1,38 @@
-
-GET       /v2/                                Check that endpoints implements Docker Registry API V2  Base
-GET       /v2/<name>/tags/list                Fetch the tags under the repo named <name>              Tags
-* GET, HEAD /v2/<name>/manifests/<reference>    Fetch the manifest.                                     Manifest
-PUT       /v2/<name>/manifests/<reference>    Put the manifest                                        Manifest
-DELETE    /v2/<name>/manifests/<reference>    Delete the manifest                                     Manifest
-GET       /v2/<name>/blobs/<digest>           Retrieve the blob from registry                         Blob
-POST      /v2/<name>/blobs/uploads/           Initiate blob upload                                    Initiate blob upload
-DELETE    /v2/<name>/blobs/<digest>           Delete the blob from registry                           Blob
-GET       /v2/<name>/blobs/uploads/<uuid>     Retrieve status of upload initiated by <uuid>           Blob upload
-PATCH     /v2/<name>/blobs/uploads/<uuid>     Upload a chunk of data for the specified upload         Blob upload
-PUT       /v2/<name>/blobs/uploads/<uuid>     Complete upload specified by <uuid>                     Blob upload
-DELETE    /v2/<name>/blobs/uploads/<uuid>     Cancel oustanding upload process                        Blob upload
+https://docs.docker.com/registry/spec/api/
 
 
-- Pulling an image
-Retrieve the manifest, then downloading each layer by digest.
-
-- Pushing an image
-After assembling the image manifest, client must first push the invidual layers.
-When layers are fully pushed into the registry, the client should upload the signed manifest.
-
-- Pull
-Pull image manifest             GET /v2/<name>/manifests/<reference>
-Existing manifest               HEAD /v2/<name>/manifests/<reference>
-Pulling a layer                 GET /v2/<name>/blobs/<digest>
-
-- Push
-Starting upload                 POST /v2/<name>/blobs/uploads/
-Existing layers                 HEAD /v2/<name>/blobs/<digest>
-Upload progress                 GET /v2/<name>/blobs/uploads/<uuid>
-Monolithic upload               PUT /v2/<name>/blobs/uploads/<uuid>?digest=<digest>     
-Chunked upload                  PATCH /v2/<name>/blobs/uploads/<uuid>     
-
-PATCH /v2/<name>/blobs/uploads/<uuid>
-Content-Length: <size of chunk>
-Content-Range: <start of range>-<end of range>
-Content-Type: application/octet-stream
-
-<Layer Chunk Binary Data>
-
-202 Accepted
-Location: /v2/<name>/blobs/uploads/<uuid>
-Range: bytes=0-<offset>
-Content-Length: 0
-Docker-Upload-UUID: <uuid>
+* PUT Manifest
+Put the manifest identified by name and reference where reference can be a tag or digest.
 
 
-Complete upload                 PUT /v2/<name>/blobs/uploads/<uuid>?digest=<digest>       
+On Success:
 
-PUT /v2/<name>/blobs/uploads/<uuid>?digest=<digest>
-Content-Length: <size of chunk>
-Content-Range: <start of range>-<end of range>
-Content-Type: application/octet-stream
-
-<Last Layer Chunk Binary Data>
-
-Last chunk:
 201 Created
-Location: /v2/<name>/blobs/<digest>
+Location: <url>
 Content-Length: 0
 Docker-Content-Digest: <digest>
 
+On Failure: Invalid Manifest
+400 Bad Request
+Content-Type: application/json; charset=utf-8
 
+The name and reference fields of the response body must match those specified in the URL. 
+The reference field may be a “tag” or a “digest”.
+The content type should match the type of the manifest being uploaded, as specified in manifest-v2-1.md and manifest-v2-2.md.
 
-Cancelling an upload            DELETE /v2/<name>/blobs/uploads/<uuid>
+If there is a problem with pushing the manifest, a relevant 4xx response will be returned with a JSON error message. 
+Please see the PUT Manifest section for details on possible error codes that may be returned.
+If one or more layers are unknown to the registry, BLOB_UNKNOWN errors are returned. 
+The detail field of the error response will have a digest field identifying the missing blob. 
+An error is returned for each unknown blob. The response format is as follows:
 
-
-
+{
+	"errors:" [
+	    {
+            "code": <error code>,
+            "message": "<error message>",
+            "detail": ...
+        },
+        ...
+    ]
+}
