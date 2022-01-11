@@ -30,13 +30,18 @@ Docker Remote caching
     6. Must support various cli tools (docker-cli, img, buildx)
     7. Must support proxying private docker repos
 
-  <-----------          Docker Registry API v2      <--------------  Docker HUB
+* Pull-through cache of docker repositories
+
+<-- nginx <----------   Docker Registry API v2      <--------------  Docker HUB
+
 
                                                     <--------------  Azure ACR
 
                                                     <--------------  Google GCR
 
                                                     <--------------  AWS ECR
+
+                                                    <-------------   Docker V2 Registry
 
 
 

@@ -21,12 +21,10 @@ func Execute() {
 		PkgType: repo.Docker,
 		URL:     "https://registry-1.docker.io",
 	})
-
 	r := mux.NewRouter()
 	apiRouter := r.PathPrefix("/api").Subrouter()
 	dockerproxy.RegisterHandlers(r, fs, repoIndex)
 	log.Print(apiRouter)
-
 	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%s %s", r.Method, r.URL)
 	})
