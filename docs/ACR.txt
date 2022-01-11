@@ -1,0 +1,36 @@
+docker image pull acr12312321.azurecr.io/redis:latest
+HTTPS GET         acr12312321.azurecr.io /v2/
+HTTPS GET         acr12312321.azurecr.io /oauth2/token?account=acr12312321&scope=repository%3Aredis%3Apull&service=acr12312321.azurecr.io
+
+Host:             acr12312321.azurecr.io
+User-Agent:       docker/20.10.12 go/go1.16.12 git-commit/459d0df kernel/5.15.12-200.fc35.x86_64 os/linux arch/amd64 UpstreamClient(Docker-Client/20.10.12 \\(linux\\))
+Authorization:    Basic <basic-auth>
+Accept-Encoding:  gzip
+Connection:       close
+Query                                                                                                                                                                                                   [m:auto]
+account: acr12312321
+scope:   repository:redis:pull
+service: acr12312321.azurecr.io
+
+Server:                         openresty
+Date:                           Tue, 11 Jan 2022 23:25:01 GMT
+Content-Type:                   application/json; charset=utf-8
+Transfer-Encoding:              chunked
+Connection:                     close
+X-Ms-Correlation-Request-Id:    b0abd9be-0047-43b0-9790-c7088e74c281
+x-ms-ratelimit-remaining-calls  166.65
+-per-second:
+Strict-Transport-Security:      max-age=31536000; includeSubDomains
+JSON                                                                                                                                                                                                    [m:auto]
+{
+    "access_token": "<token>"
+}
+
+HTTPS HEAD        acr12312321.azurecr.io /v2/redis/manifests/latest
+HTTPS GET         acr12312321.azurecr.io /v2/redis/blobs/sha256:7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631 307
+HTTPS GET         acr12312321.azurecr.io /v2/redis/blobs/sha256:4044b9ba67c9376f8a6431064d2d4c5e11178af52db9a0a16e46c0f9dbcf12aa 307
+HTTPS GET         acr12312321.azurecr.io /v2/redis/blobs/sha256:c7a4e438200131dd0653eec624ffe4969dba13e7b0ebcea90753a492d63e1ebc 307
+HTTPS GET         acr12312321.azurecr.io /v2/redis/blobs/sha256:c8388a79482fce47e8f9cc1811df4f4fbd12260fee9128b29903bf4a3f33dd01 307
+HTTPS GET  …ged156.blob.core.windows.net /6e66f84e92314a33a933ae9dffc30e1a-slwu4b4jvy//docker/registry/v2/blobs/sha256/76/7614ae9453d1d87e740a2056257a6de7135… 200
+Follows all redirects to blob storage redirects
+...

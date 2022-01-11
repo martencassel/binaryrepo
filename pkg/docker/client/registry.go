@@ -56,6 +56,7 @@ func newFromTransport(ctx context.Context, auth AuthConfig, transport http.Round
 		Transport: transport,
 		Username:  auth.Username,
 		Password:  auth.Password,
+		Scope:     auth.Scope,
 	}
 	basicAuthTransport := &BasicTransport{
 		Transport: tokenTransport,

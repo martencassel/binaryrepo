@@ -34,7 +34,6 @@ Docker Remote caching
 
 <-- nginx <----------   Docker Registry API v2      <--------------  Docker HUB
 
-
                                                     <--------------  Azure ACR
 
                                                     <--------------  Google GCR

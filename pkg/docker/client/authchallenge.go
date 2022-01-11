@@ -3,6 +3,7 @@ package client
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -27,6 +28,7 @@ func parseAuthHeader(header http.Header) (*authService, error) {
 }
 
 func parseChallenge(challengeHeader string) (*authService, error) {
+	log.Println(challengeHeader)
 	if basicRegex.MatchString(challengeHeader) {
 		return nil, ErrBasicAuth
 	}

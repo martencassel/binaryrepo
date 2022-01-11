@@ -13,6 +13,8 @@ type TokenTransport struct {
 	Transport http.RoundTripper
 	Username  string
 	Password  string
+	Account   string
+	Scope     string
 }
 
 func (t *TokenTransport) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -34,15 +36,21 @@ func (t *TokenTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 
 type authService struct {
 	Realm   *url.URL
+	Account string
 	Service string
 	Scope   []string
 }
 
-func (a *authService) Request(username, password string) (*http.Request, error) {
+func (a *authService) Request(username, password, scope string) (*http.Request, error) {
 	q := a.Realm.Query()
 	q.Set("service", a.Service)
-	for _, s := range a.Scope {
-		q.Set("scope", s)
+	q.Set("account", username)
+	if scope != "" {
+		q.Set("scope", scope)
+	} else {
+		for _, s := range a.Scope {
+			q.Set("scope", s)
+		}
 	}
 	a.Realm.RawQuery = q.Encode()
 	req, err := http.NewRequest("GET", a.Realm.String(), nil)
@@ -87,7 +95,7 @@ func (t *TokenTransport) authAndRetry(authService *authService, req *http.Reques
 }
 
 func (t *TokenTransport) auth(ctx context.Context, authService *authService) (string, *http.Response, error) {
-	authReq, err := authService.Request(t.Username, t.Password)
+	authReq, err := authService.Request(t.Username, t.Password, t.Scope)
 	if err != nil {
 		return "", nil, err
 	}

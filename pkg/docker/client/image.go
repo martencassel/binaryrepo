@@ -24,7 +24,6 @@ func (i Image) Reference() string {
 	if len(i.Digest.String()) > 1 {
 		return i.Digest.String()
 	}
-
 	return i.Tag
 }
 

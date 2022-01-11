@@ -1,3 +1,4 @@
 binaryrepo
 .tmp
 .vscode
+local.env
