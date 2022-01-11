@@ -1,6 +1,33 @@
-.PHONY: test
-test: 
+GO_SRCS := $(shell find . -type f -name '*.go' -a ! -name 'zz_generated*')
+
+# binaryrepo run on linux
+GOARCH ?= $(shell go env GOARCH)
+GOPATH ?= $(shell go env GOPATH)
+
+GO ?= go
+golint := $(shell which golangci-lint)
+
+.PHONY: build
+build: binaryrepo
+
+TARGET_OS ?= linux
+
+binaryrepo: $(GO_SRCS)
+	GOOS=$(TARGET_OS) GOARCH=$(GOARCH) $(GO) build -o $@ main.go
+
+.PHONY: clean
+clean:
+	-rm -f ./binaryrepo
+
+.PHONY: lint
+lint:
+	$(golint) run --verbose ./...
+
+.PHONY: check-unit
+check-unit:
 	go test ./... -v
 
+.PHONY: cover
 cover:
 	go test ./... -cover
+
