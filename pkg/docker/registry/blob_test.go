@@ -1,8 +1,9 @@
 package registry
 
 import (
-	"errors"
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -47,18 +48,41 @@ func TestBlobUpload(t *testing.T) {
 		uploadPath := fmt.Sprintf("/tmp/filestore/uploads/%s", res.Header().Get("Docker-Upload-UUID"))
 		assert.True(t, fileExists(uploadPath))
 	})
-}
 
-func fileExists(path string) bool {
-	if _, err := os.Stat(path); err == nil {
-		return true
-	} else if errors.Is(err, os.ErrNotExist) {
-		return false
-	}
-	return false
-}
-
-func IsValidUUID(u string) bool {
-	_, err := uuid.Parse(u)
-	return err == nil
+	t.Run("Upload a chunk of data", func(t *testing.T) {
+		// Arrange
+		os.RemoveAll("/tmp/filestore")
+		fs := filestore.NewFileStore("/tmp/filestore")
+		index := repo.NewRepoIndex()
+		index.AddRepo(repo.Repo{ID: 1, Name: "redis-local", Type: repo.Local, PkgType: repo.Docker})
+		registry := NewDockerRegistry(fs, index)
+		uuid := uuid.New().String()
+		uploadPath := fmt.Sprintf("/tmp/filestore/uploads/%s", uuid)
+		ioutil.WriteFile(uploadPath, []byte(""), 0644)
+		blob, err := ioutil.ReadFile("./testdata/7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		// Act
+		res := httptest.NewRecorder()
+		vars := map[string]string{
+			"repo-name": "redis-local",
+			"name":      "redis",
+			"uuid":      uuid,
+		}
+		body := bytes.NewBuffer(blob)
+		req, _ := http.NewRequest(http.MethodPut, "", body)
+		req = mux.SetURLVars(req, vars)
+		req.Header.Add("Transfer-Encoding", "chunked")
+		req.Header.Add("Accept-Encoding", "gzip")
+		registry.UploadChunk(res, req)
+		// Assert
+		offset := len(blob) - 1
+		assert.Equal(t, http.StatusAccepted, res.Code)
+		assert.Contains(t, "registry/2.0", res.Header().Get("docker-distribution-api-version"))
+		assert.Contains(t, "0", res.Header().Get("Content-Length"))
+		assert.True(t, IsValidUUID(res.Header().Get("docker-upload-uuid")))
+		assert.Equal(t, fmt.Sprintf("0-%d", offset), res.Header().Get("range"))
+		assert.Equal(t, "close", res.Header().Get("Connection"))
+	})
 }
