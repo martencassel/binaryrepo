@@ -1,6 +1,12 @@
 Here goes docs.
 
-Problem
+
+Use case
+
+    Remote proxy caching of docker registries (public or private) from multiple providers.
+
+
+Design problems
 
     1. Unit testing an API client in golang.
 
