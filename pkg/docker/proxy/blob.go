@@ -1,16 +1,11 @@
 package dockerproxy
 
 import (
-	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"strconv"
 
 	"github.com/gorilla/mux"
-	filestore "github.com/martencassel/binaryrepo/pkg/filestore/fs"
 	repo "github.com/martencassel/binaryrepo/pkg/repo"
 	"github.com/opencontainers/go-digest"
 )
@@ -96,28 +91,7 @@ func (p *DockerProxyApp) DownloadLayer(w http.ResponseWriter, req *http.Request)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	manifestDirector := manifestProxyDirector(opt, "", "registry-1.docker.io")
-	blobModifyResponse := getBlobModifyResponse(p.fs, opt)
-	_url, err := url.Parse(_repo.URL)
-	if err != nil {
-		log.Printf("Url was invalid")
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	errorHandler := func(rw http.ResponseWriter, r *http.Request, err error) {
-		log.Print(err)
-	}
-	/*
-		Set scope for auth request
-	*/
-	scope := getScope(opt)
-	transporter := NewReAuthTransport(_repo, scope, _repo.AccessToken)
-	proxy := httputil.NewSingleHostReverseProxy(_url)
-	proxy.Director = manifestDirector
-	proxy.ModifyResponse = blobModifyResponse
-	proxy.Transport = transporter
-	proxy.ErrorHandler = errorHandler
-	proxy.ServeHTTP(w, req)
-	//	_repo.AccessToken = transporter.accessToken
+
 }
 
 // PathGetBlob URL.
@@ -153,75 +127,4 @@ func (p *DockerProxyApp) ServeBlobHandler(w http.ResponseWriter, req *http.Reque
 		return
 	}
 	w.WriteHeader(http.StatusNotFound)
-}
-
-func FetchBlob(urlIn string) (b []byte, err error) {
-	log.Printf("FetchBlob\n")
-	log.Printf("%s %s", http.MethodGet, urlIn)
-	req, err := http.NewRequest("GET", urlIn, nil)
-	if err != nil {
-		return nil, err
-	}
-	_url, _ := url.Parse(urlIn)
-	req.Header.Set("host", _url.Host)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Accept-Encoding", "identity")
-	req.Header.Set("Connection", "close")
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if resp.Status == "401" {
-		log.Printf("401 Unauthorized")
-		return nil, fmt.Errorf("Unauthorized")
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	//	fmt.Printf("Content-Type: %s\n", resp.Header.Get("Content-Type"))
-	return body, nil
-}
-
-func getBlobModifyResponse(fs *filestore.FileStore, opt HandlerOptions) func(resp *http.Response) error {
-	f := func(resp *http.Response) (err error) {
-		log.Printf("%s %s %s", resp.Request.Method, resp.Request.URL.Path, resp.Status)
-		log.Printf("getBlobModifyResponse(%s)", resp.Request.URL.Path)
-		PrintOptions(resp.Request, opt)
-		log.Printf("Location: %s", resp.Header.Get("Location"))
-		digest := digest.Digest(opt.digest)
-		exists := fs.Exists(digest)
-		log.Print("Exists: %w", exists)
-		// If the blobs exists, set Location and redirect to ServeBlobHandler
-		if exists {
-			newLocation := fmt.Sprintf("/repo/%s/v2/blob/%s", opt.repoName, digest)
-			log.Print("Redirecting to ", newLocation)
-			resp.Header.Set("Location", newLocation)
-			resp.StatusCode = http.StatusTemporaryRedirect
-			return
-		}
-		if resp.StatusCode == http.StatusTemporaryRedirect {
-			b, err := FetchBlob(resp.Header.Get("location"))
-			if err != nil {
-				log.Printf("Err: %s", err)
-				return err
-			}
-			digest, err := fs.WriteFile(b)
-			if err != nil {
-				log.Printf("Err: %s", err)
-				return err
-			}
-			log.Printf("Stored blob %s", digest)
-			newLocation := fmt.Sprintf("/repo/%s/v2/blob/%s", opt.repoName, digest)
-			log.Print("Redirecting to ", newLocation)
-			resp.Header.Set("Location", newLocation)
-			resp.StatusCode = http.StatusTemporaryRedirect
-		}
-		return
-	}
-	return f
 }

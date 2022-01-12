@@ -9,21 +9,6 @@ import (
 	repo "github.com/martencassel/binaryrepo/pkg/repo"
 )
 
-type DockerProxyApp struct {
-	fs    *filestore.FileStore
-	index *repo.RepoIndex
-}
-
-func NewDockerProxyApp() *DockerProxyApp {
-	p := DockerProxyApp{
-		fs:    filestore.NewFileStore("/tmp/filestore"),
-		index: repo.NewRepoIndex(),
-	}
-	return &p
-}
-
-// RegisterHandlers is a method that registers
-// all the docker proxy paths.
 func RegisterHandlers(r *mux.Router, fs *filestore.FileStore, repoIndex *repo.RepoIndex) {
 	log.Print("Registering docker proxy handlers")
 	p := NewDockerProxyApp()
