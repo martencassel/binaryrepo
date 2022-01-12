@@ -17,7 +17,7 @@ curl -X GET http://localhost:8080/api/repository
           "package_type": "helm",
           "remote_url": "https://charts.bitnami.com/bitnami"
         }
-    ]    
+    ]
 }
 
 # Helm repo add

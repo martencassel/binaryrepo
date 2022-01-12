@@ -17,7 +17,7 @@ func TestPingable(t *testing.T) {
 		expect   bool
 	}{
 		"Docker": {
-			registry: Registry{URL: "https://index.docker.io"},
+			registry: Registry{URL: "https://registry-1.docker.io"},
 			expect:   true,
 		},
 		"GCR_global": {
@@ -45,7 +45,7 @@ func TestPingDockerHubAuth(t *testing.T) {
 		Username:      hubUser,
 		Password:      hubPass,
 		Scope:         "repository:library/redis:pull",
-		ServerAddress: "https://index.docker.io",
+		ServerAddress: "https://registry-1.docker.io",
 	}
 	opt := &Opt{
 		Domain:   "docker.io",

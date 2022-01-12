@@ -1,8 +1,7 @@
 # Build
 
 ```bash
-make clean
-make build
+make
 ```
 
 # Run the server

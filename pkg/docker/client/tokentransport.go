@@ -2,12 +2,16 @@ package client
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 )
+
+var gcrMatcher = regexp.MustCompile(`https://([a-z]+\.|)gcr\.io/`)
 
 type TokenTransport struct {
 	Transport http.RoundTripper
@@ -32,6 +36,56 @@ func (t *TokenTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 	resp.Body.Close()
 	return t.authAndRetry(authService, req)
+}
+
+func (r *Registry) Token(ctx context.Context, url string) (string, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return "", err
+	}
+	client := http.DefaultClient
+	if r.Opt.Insecure {
+		client = &http.Client{
+			Timeout: r.Opt.Timeout,
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true,
+				},
+			},
+		}
+	}
+	resp, err := client.Do(req.WithContext(ctx))
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusForbidden && gcrMatcher.MatchString(url) {
+		return "", ErrBasicAuth
+	}
+	a, err := isTokenDemand(resp)
+	if err != nil {
+		return "", err
+	}
+	if a == nil {
+		return "", nil
+	}
+	authReq, err := a.Request(r.Username, r.Password, r.Scope)
+	if err != nil {
+		return "", err
+	}
+	resp, err = http.DefaultClient.Do(authReq)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+	var authToken authToken
+	if err := json.NewDecoder(resp.Body).Decode(&authToken); err != nil {
+		return "", err
+	}
+	return authToken.String()
 }
 
 type authService struct {

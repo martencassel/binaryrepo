@@ -19,6 +19,7 @@ type Registry struct {
 	Domain   string
 	Username string
 	Password string
+	Scope    string
 	Client   *http.Client
 	Opt      Opt
 }
@@ -30,6 +31,8 @@ type Opt struct {
 	SkipPing bool
 	Timeout  time.Duration
 	NonSSL   bool
+	Insecure bool
+	Debug    bool
 	Headers  map[string]string
 }
 
