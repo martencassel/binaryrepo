@@ -8,23 +8,10 @@ import (
 	_ "crypto/sha256"
 
 	"github.com/opencontainers/go-digest"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFileStore(t *testing.T) {
-	t.Run("Get filepath from cheksum", func(t *testing.T) {
-		os.RemoveAll("/tmp/filestore")
-		fs := NewFileStore("/tmp/filestore")
-		b, _ := ioutil.ReadFile("./testdata/file1")
-		digest, err := fs.WriteFile(b)
-		if err != nil {
-			t.Fatal(err)
-		}
-		path := getFilePath(fs.BasePath, digest)
-		if path != "/tmp/filestore/c1/47efcfc2d7ea666a9e4f5187b115c90903f0fc896a56df9a6ef5d8f3fc9f31" {
-			t.Errorf("got %s, want %s", path, "/tmp/filestore/c1/47efcfc2d7ea666a9e4f5187b115c90903f0fc896a56df9a6ef5d8f3fc9f31")
-		}
-	})
-
 	t.Run("Create filestore at base directory", func(t *testing.T) {
 		os.RemoveAll("/tmp/filestore")
 		fs := NewFileStore("/tmp/filestore")
@@ -73,5 +60,17 @@ func TestFileStore(t *testing.T) {
 		if b != nil && err == nil {
 			t.Fatal("Not expecting file to be found")
 		}
+	})
+	t.Run("Get filepath from digest", func(t *testing.T) {
+		fs := NewFileStore("/tmp/filestore")
+		sha := "sha256:56704d8d370580ad16fcfbf725982551da20fb82b4450f9aedfd055fa9857967"
+		digest, err := digest.Parse(sha)
+		if err != nil {
+			t.Fatal(err)
+		}
+		filePath, folderPath, fileName := getFilePath(fs.BasePath, digest)
+		assert.Equal(t, "/tmp/filestore/56/704d8d370580ad16fcfbf725982551da20fb82b4450f9aedfd055fa9857967", filePath)
+		assert.Equal(t, "/tmp/filestore/56", folderPath)
+		assert.Equal(t, "704d8d370580ad16fcfbf725982551da20fb82b4450f9aedfd055fa9857967", fileName)
 	})
 }

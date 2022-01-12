@@ -61,12 +61,10 @@ func parseChallenge(challengeHeader string) (*authService, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	a := &authService{
 		Realm:   parsedRealm,
 		Service: service,
 		Scope:   scope,
 	}
-
 	return a, nil
 }

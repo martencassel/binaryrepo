@@ -25,30 +25,25 @@ func NewFileStore(basePath string) *FileStore {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	return fs
 }
 
-func getFilePath(basePath string, digest digest.Digest) string {
+func getFilePath(basePath string, digest digest.Digest) (string, string, string) {
 	encodedDigest := digest.Encoded()
 	first := encodedDigest[0:2]
 	last := encodedDigest[2:]
 	folderName := string(first)
 	fileName := string(last)
 	filePath := fmt.Sprintf("%s/%s/%s", basePath, folderName, fileName)
-	return filePath
+	folderPath := fmt.Sprintf("%s/%s", basePath, folderName)
+	return filePath, folderPath, fileName
 }
 
 func (fs *FileStore) Remove(digest digest.Digest) error {
 	if !fs.Exists(digest) {
 		return nil
 	}
-	encodedDigest := digest.Encoded()
-	first := encodedDigest[0:2]
-	last := encodedDigest[2:]
-	folderName := string(first)
-	fileName := string(last)
-	filePath := fmt.Sprintf("%s/%s/%s", fs.BasePath, folderName, fileName)
+	filePath, _, _ := getFilePath(fs.BasePath, digest)
 	err := os.Remove(filePath)
 	if err != nil {
 		log.Fatal(err)
@@ -58,25 +53,19 @@ func (fs *FileStore) Remove(digest digest.Digest) error {
 }
 
 func (fs *FileStore) Exists(digest digest.Digest) bool {
-	filePath := getFilePath(fs.BasePath, digest)
+	filePath, _, _ := getFilePath(fs.BasePath, digest)
 	_, err := os.Stat(filePath)
 	return err == nil
 }
 
 func (fs *FileStore) WriteFile(b []byte) (digest.Digest, error) {
 	digest := digest.FromBytes(b)
-	encodedDigest := digest.Encoded()
-	first := encodedDigest[0:2]
-	last := encodedDigest[2:]
-	folderName := string(first)
-	fileName := string(last)
-	folderPath := fmt.Sprintf("%s/%s", fs.BasePath, folderName)
+	filePath, folderPath, _ := getFilePath(fs.BasePath, digest)
 	err := os.MkdirAll(folderPath, 0755)
 	if err != nil {
 		log.Fatal(err)
 		return digest.Algorithm().FromString(""), err
 	}
-	filePath := fmt.Sprintf("%s/%s", folderPath, fileName)
 	err = ioutil.WriteFile(filePath, b, 0644)
 	if err != nil {
 		log.Fatal(err)
@@ -86,12 +75,7 @@ func (fs *FileStore) WriteFile(b []byte) (digest.Digest, error) {
 }
 
 func (fs *FileStore) ReadFile(digest digest.Digest) ([]byte, error) {
-	encodedDigest := digest.Encoded()
-	first := encodedDigest[0:2]
-	last := encodedDigest[2:]
-	folderName := string(first)
-	fileName := string(last)
-	filePath := fmt.Sprintf("%s/%s/%s", fs.BasePath, folderName, fileName)
+	filePath, _, _ := getFilePath(fs.BasePath, digest)
 	// Check if file exists
 	file, err := os.Stat(filePath)
 	if err != nil {
@@ -106,7 +90,3 @@ func (fs *FileStore) ReadFile(digest digest.Digest) ([]byte, error) {
 	}
 	return b, nil
 }
-
-// func (fs *FileStore) Size(digest digest.Digest) (int, error) {
-
-// }
