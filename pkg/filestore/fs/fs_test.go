@@ -19,6 +19,10 @@ func TestFileStore(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		_, err = os.Stat(fs.BasePath + "/uploads")
+		if err != nil {
+			t.Fatal(err)
+		}
 	})
 	t.Run("Writing a file", func(t *testing.T) {
 		os.RemoveAll("/tmp/filestore")
@@ -42,6 +46,20 @@ func TestFileStore(t *testing.T) {
 		if fs.Exists(digest) != true {
 			t.Fatal("file not found")
 		}
+	})
+	t.Run("Remove a file", func(t *testing.T) {
+		os.RemoveAll("/tmp/filestore")
+		fs := NewFileStore("/tmp/filestore")
+		b, _ := ioutil.ReadFile("./testdata/file1")
+		fsDigest, err := fs.WriteFile(b)
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = fs.Remove(fsDigest)
+		if err != nil {
+			t.Fatal(err)
+		}
+		assert.Equal(t, fs.Exists(fsDigest), false)
 	})
 	t.Run("Check for existance of file using digest", func(t *testing.T) {
 		os.RemoveAll("/tmp/filestore")
