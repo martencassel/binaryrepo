@@ -30,7 +30,6 @@ func (r *Registry) DownloadLayer(ctx context.Context, repository string, digest 
 func (r *Registry) HasLayer(ctx context.Context, repository string, digest digest.Digest) (bool, error) {
 	checkURL := r.url("/v2/%s/blobs/%s", repository, digest)
 	log.Printf("registry.layer.check url=%s repository=%s digest=%s", checkURL, repository, digest)
-
 	req, err := http.NewRequest("HEAD", checkURL, nil)
 	if err != nil {
 		return false, err
@@ -40,7 +39,6 @@ func (r *Registry) HasLayer(ctx context.Context, repository string, digest diges
 		defer resp.Body.Close()
 		return resp.StatusCode == http.StatusOK, nil
 	}
-
 	urlErr, ok := err.(*url.Error)
 	if !ok {
 		return false, err
@@ -52,6 +50,5 @@ func (r *Registry) HasLayer(ctx context.Context, repository string, digest diges
 	if httpErr.Response.StatusCode == http.StatusNotFound {
 		return false, nil
 	}
-
 	return false, err
 }

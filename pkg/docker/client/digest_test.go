@@ -33,7 +33,6 @@ func TestDigestFromDockerHub(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-
 	d, err := r.Digest(ctx, Image{Domain: "docker.io", Path: "library/redis", Tag: "latest"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)

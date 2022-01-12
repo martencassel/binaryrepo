@@ -32,7 +32,6 @@ func (t *ErrorTransport) RoundTrip(request *http.Request) (*http.Response, error
 		if err != nil {
 			return nil, fmt.Errorf("http: failed to read response body (status=%v, err=%q)", resp.StatusCode, err)
 		}
-
 		return nil, &httpStatusError{
 			Response: resp,
 			Body:     body,
