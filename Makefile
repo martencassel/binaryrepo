@@ -33,4 +33,6 @@ cover:
 
 .PHONY: run
 run: binaryrepo
+	unset http_proxy 
+	unset https_proxy
 	./binaryrepo

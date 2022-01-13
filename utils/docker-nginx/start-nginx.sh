@@ -1,6 +1,7 @@
 #!/bin/bash
 
-unset http_proxy https_proxy
+unset http_proxy 
+unset https_proxy
 
 # Remove any old instances
 docker rm -f $(docker ps -aq)

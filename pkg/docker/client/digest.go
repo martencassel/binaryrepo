@@ -10,25 +10,31 @@ import (
 	"github.com/opencontainers/go-digest"
 )
 
-func (r *Registry) Digest(ctx context.Context, image Image) (digest.Digest, error) {
+func (r *Registry) Digest(ctx context.Context, image Image) (digest.Digest, *http.Response, error) {
 	if len(image.Digest) > 1 {
-		return image.Digest, nil
+		return image.Digest, nil, nil
 	}
 	url := r.url("/v2/%s/manifests/%s", image.Path, image.Tag)
 	log.Printf("manifests.get url=%s repository=%s ref=%s",
 		url, image.Path, image.Tag)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	req.Header.Add("Accept", schema2.MediaTypeManifest)
 	resp, err := r.Client.Do(req.WithContext(ctx))
 	if err != nil {
-		defer resp.Body.Close()
-		return "", err
+		if resp != nil {
+			defer resp.Body.Close()
+		}
+		return "", resp, err
 	}
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
-		return "", fmt.Errorf("got status code: %d", resp.StatusCode)
+		return "", resp, fmt.Errorf("got status code: %d", resp.StatusCode)
 	}
-	return digest.Parse(resp.Header.Get("Docker-Content-Digest"))
+	d, err := digest.Parse(resp.Header.Get("Docker-Content-Digest"))
+	if err != nil {
+		return "", resp, err
+	}
+	return d, resp, nil
 }
