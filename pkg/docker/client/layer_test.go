@@ -27,7 +27,7 @@ func TestLayerFromDockerHub(t *testing.T) {
 	}, Opt{
 		Domain:   "docker.io",
 		SkipPing: false,
-		Timeout:  time.Second * 30,
+		Timeout:  time.Second * 120,
 		NonSSL:   false,
 		Insecure: false,
 	})

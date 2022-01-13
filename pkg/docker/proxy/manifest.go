@@ -35,7 +35,7 @@ func (p *DockerProxyApp) GetManifestHandler(w http.ResponseWriter, req *http.Req
 	}, regclient.Opt{
 		Domain:   "docker.io",
 		SkipPing: false,
-		Timeout:  time.Second * 30,
+		Timeout:  time.Second * 120,
 		NonSSL:   false,
 		Insecure: false,
 	})
@@ -96,7 +96,7 @@ func (p *DockerProxyApp) HeadManifestHandler(w http.ResponseWriter, req *http.Re
 	}, regclient.Opt{
 		Domain:   "docker.io",
 		SkipPing: false,
-		Timeout:  time.Second * 30,
+		Timeout:  time.Second * 120,
 		NonSSL:   false,
 		Insecure: false,
 	})
