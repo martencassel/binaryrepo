@@ -33,7 +33,7 @@ as a remote proxy cache of docker hub.
 
 Docker pull command will access the remote repo through a local nginx container.
 
-# Prerequisites
+## Prerequisites
 1. Create certs
 ```bash
 make setup-certs
@@ -43,16 +43,16 @@ ls ~/certs
 ```bash
 127.0.0.1 docker-remote.example.com
 ```
-# Start everything and run docker pull tests
+## Start everything and run docker pull tests
 ```bash
 make check-remote-pull
 ```
-# Building
+## Building
 
 ```bash
 make build
 ```
-# Working demo
+## Working demo
 Proxy docker images from docker hub
 
 - Create certs under $HOME/certs/ for nginx, add add the certs to your local cert store.
