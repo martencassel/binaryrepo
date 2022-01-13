@@ -3,6 +3,7 @@ package dockerproxy
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strconv"
@@ -120,6 +121,22 @@ func (p *DockerProxyApp) DownloadLayer(w http.ResponseWriter, req *http.Request)
 	if err != nil {
 		log.Printf("Error getting digest: %s\n", err)
 	}
+
+	// Save file to cache
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Error reading response body: %s\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+	_, err = p.fs.WriteFile(bodyBytes)
+	if err != nil {
+		log.Printf("Error writing to cache: %s\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	copyResponse(w, resp)
 }
 

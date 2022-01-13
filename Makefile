@@ -16,7 +16,7 @@ binaryrepo: $(GO_SRCS)
 	GOOS=$(TARGET_OS) GOARCH=$(GOARCH) $(GO) build -o $@ main.go
 
 .PHONY: check-remote-pull
-check-remote-pull:
+check-remote-pull: build reverse-proxy start
 	./inttest/remote_docker_pull.sh
 
 .PHONY: clean
@@ -35,11 +35,19 @@ check-unit:
 cover:
 	go test ./... -cover
 
-.PHONY: run
-run: binaryrepo
+.PHONY: reverse-proxy
+reverse-proxy:
+	bash ./utils/docker-nginx/start-nginx.sh
+
+.PHONY: start
+start: binaryrepo
 	unset http_proxy
 	unset https_proxy
-	./binaryrepo
+	./binaryrepo &
+
+.PHONY: stop
+stop:
+	kill `pidof binaryrepo`
 
 .PHONY: setup-certs
 setup-certs:
