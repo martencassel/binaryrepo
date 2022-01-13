@@ -9,12 +9,12 @@ Docker pull command will access the remote repo through a local nginx container.
 
 #### Prerequisites
 1. Create certs
-```
+```bash
 make setup-certs
 ls ~/certs
 ```
 2. Modify /etc/hosts
-...
+```bash
 127.0.0.1 docker-remote.example.com
 ```
 #### Start everything and run docker pull tests
