@@ -14,11 +14,12 @@ import (
 var gcrMatcher = regexp.MustCompile(`https://([a-z]+\.|)gcr\.io/`)
 
 type TokenTransport struct {
-	Transport http.RoundTripper
-	Username  string
-	Password  string
-	Account   string
-	Scope     string
+	Transport   http.RoundTripper
+	Username    string
+	Password    string
+	Account     string
+	Scope       string
+	BearerToken string
 }
 
 func (t *TokenTransport) RoundTrip(req *http.Request) (*http.Response, error) {

@@ -1,4 +1,27 @@
+# About this project
+## Motivation
+
+Learn how various package managers work, and how content are downloaded from the internet.
+Improve the way packages are downloaded and managed by implementing a all-in-one binary repository manager
+that can serve multiple packages types, local access or remote access (proxy cache).
+
+Downloading docker images from docker hub can be slow.
+
+Solution:
+
+Binaryrepo serves a caching proxy for any remote registry that implements Docker Registry v2 API.
+Requests are served from its local cache (the file storage), if not available in the cache, requests
+are forwarded to the remote registry, and resources are fetched and saved to the cache for future requests.
+
+# Future plans
+
+I plan to implement a local Docker Registry v2, that can be used together with caching proxy functionality.
+I may also implement support for other package types such as Go modules and Helm packages.
+
 # binary-repo
+
+Please add a small section about the problem and how this project solves
+
 
 ### Getting started
 
