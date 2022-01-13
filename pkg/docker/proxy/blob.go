@@ -139,38 +139,3 @@ func (p *DockerProxyApp) DownloadLayer(w http.ResponseWriter, req *http.Request)
 
 	copyResponse(w, resp)
 }
-
-// PathGetBlob URL.
-const PathServeBlobURL = "/repo/{repo-name}/v2/blob/{digest}"
-
-// GET /repo/{repo-name}/v2/blob/{digest}
-func (p *DockerProxyApp) ServeBlobHandler(w http.ResponseWriter, req *http.Request) {
-	//	log.Printf("%s %s %s", req.Method, req.URL.Path, req.Response.Status)
-	vars := mux.Vars(req)
-	in_digest := vars["digest"]
-	digest, err := digest.Parse(in_digest)
-	log.Printf("%s %s", req.Method, req.URL.Path)
-	log.Printf("ServeBlobHandler: %s", in_digest)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	blobExists := p.fs.Exists(digest)
-	if blobExists {
-		log.Printf("Served blob %s", in_digest)
-		b, err := p.fs.ReadFile(digest)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		_, err = w.Write(b)
-		if err != nil {
-			log.Printf("Error writing to response writer %s", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Length", strconv.Itoa(len(b)))
-		return
-	}
-	w.WriteHeader(http.StatusNotFound)
-}
