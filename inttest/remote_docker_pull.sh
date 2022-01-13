@@ -22,3 +22,6 @@ docker pull docker-remote.example.com/redis:latest
 docker pull docker-remote.example.com/alpine:latest
 docker pull docker-remote.example.com/postgres:latest
 
+# Here goes the cache
+tree /tmp/filestore
+
