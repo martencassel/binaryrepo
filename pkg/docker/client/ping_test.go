@@ -50,7 +50,7 @@ func TestPingDockerHubAuth(t *testing.T) {
 	opt := &Opt{
 		Domain:   "docker.io",
 		SkipPing: false,
-		Timeout:  time.Second * 5,
+		Timeout:  time.Second * 30,
 		NonSSL:   false,
 		Headers:  map[string]string{},
 	}
@@ -81,7 +81,7 @@ func TestPingACRAuth(t *testing.T) {
 	opt := &Opt{
 		Domain:   acrServerAddress,
 		SkipPing: false,
-		Timeout:  time.Second * 5,
+		Timeout:  time.Second * 30,
 		NonSSL:   false,
 		Headers:  map[string]string{},
 	}

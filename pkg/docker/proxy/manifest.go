@@ -35,7 +35,7 @@ func (p *DockerProxyApp) GetManifestHandler(w http.ResponseWriter, req *http.Req
 	}, regclient.Opt{
 		Domain:   "docker.io",
 		SkipPing: false,
-		Timeout:  time.Second * 5,
+		Timeout:  time.Second * 30,
 		NonSSL:   false,
 		Insecure: false,
 	})
@@ -86,4 +86,29 @@ func (p *DockerProxyApp) HeadManifestHandler(w http.ResponseWriter, req *http.Re
 	}
 	reference := vars["reference"]
 	log.Print(reference, opt)
+	ctx := context.Background()
+	scope := fmt.Sprintf("repository:library/%s:pull", opt.namespace)
+	r, err := regclient.New(ctx, regclient.AuthConfig{
+		Username:      _repo.Username,
+		Password:      _repo.Password,
+		Scope:         scope,
+		ServerAddress: _repo.URL,
+	}, regclient.Opt{
+		Domain:   "docker.io",
+		SkipPing: false,
+		Timeout:  time.Second * 30,
+		NonSSL:   false,
+		Insecure: false,
+	})
+	if err != nil {
+		log.Printf("Error creating registry client: %s\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	path := fmt.Sprintf("library/%s", opt.namespace)
+	_, resp, err := r.Digest(ctx, regclient.Image{Domain: "docker.io", Path: path, Tag: opt.reference})
+	if err != nil {
+		log.Printf("Error getting digest: %s\n", err)
+	}
+	copyResponse(w, resp)
 }

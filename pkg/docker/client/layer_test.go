@@ -27,14 +27,14 @@ func TestLayerFromDockerHub(t *testing.T) {
 	}, Opt{
 		Domain:   "docker.io",
 		SkipPing: false,
-		Timeout:  time.Second * 5,
+		Timeout:  time.Second * 30,
 		NonSSL:   false,
 		Insecure: false,
 	})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	exists, err := r.HasLayer(ctx, "library/redis", "sha256:c8388a79482fce47e8f9cc1811df4f4fbd12260fee9128b29903bf4a3f33dd01  ")
+	exists, _, err := r.HasLayer(ctx, "library/redis", "sha256:c8388a79482fce47e8f9cc1811df4f4fbd12260fee9128b29903bf4a3f33dd01")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -45,7 +45,7 @@ func TestLayerFromDockerHub(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	rc, err := r.DownloadLayer(ctx, "library/redis", digest)
+	rc, _, err := r.DownloadLayer(ctx, "library/redis", digest)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

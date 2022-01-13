@@ -1,11 +1,15 @@
 package dockerproxy
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
+	regclient "github.com/martencassel/binaryrepo/pkg/docker/client"
 	repo "github.com/martencassel/binaryrepo/pkg/repo"
 	"github.com/opencontainers/go-digest"
 )
@@ -91,7 +95,32 @@ func (p *DockerProxyApp) DownloadLayer(w http.ResponseWriter, req *http.Request)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-
+	log.Print(digest, opt)
+	ctx := context.Background()
+	scope := fmt.Sprintf("repository:library/%s:pull", opt.namespace)
+	r, err := regclient.New(ctx, regclient.AuthConfig{
+		Username:      _repo.Username,
+		Password:      _repo.Password,
+		Scope:         scope,
+		ServerAddress: _repo.URL,
+	}, regclient.Opt{
+		Domain:   "docker.io",
+		SkipPing: false,
+		Timeout:  time.Second * 30,
+		NonSSL:   false,
+		Insecure: false,
+	})
+	if err != nil {
+		log.Printf("Error creating registry client: %s\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	path := fmt.Sprintf("library/%s", opt.namespace)
+	_, resp, err := r.DownloadLayer(ctx, path, digest)
+	if err != nil {
+		log.Printf("Error getting digest: %s\n", err)
+	}
+	copyResponse(w, resp)
 }
 
 // PathGetBlob URL.

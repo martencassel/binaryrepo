@@ -47,7 +47,6 @@ func newFromTransport(ctx context.Context, auth AuthConfig, transport http.Round
 	}
 	url := strings.TrimSuffix(opt.Domain, "/")
 	authURL := strings.TrimSuffix(auth.ServerAddress, "/")
-
 	if !reProtocol.MatchString(url) {
 		if !opt.NonSSL {
 			url = "https://" + url

@@ -26,7 +26,7 @@ func TestDigestFromDockerHub(t *testing.T) {
 	}, Opt{
 		Domain:   "docker.io",
 		SkipPing: false,
-		Timeout:  time.Second * 5,
+		Timeout:  time.Second * 30,
 		NonSSL:   false,
 		Insecure: false,
 	})
