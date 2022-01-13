@@ -1,17 +1,28 @@
 # About this project
+
+This project tries to implement a binary artifact manager server that can serve software packages such as
+Docker images, Helm charts or Go modules etc, either from a local storage or from remote sources (caching proxy).
+All binary packages are stored in a "single-instance-store" using a checksum scheme.
 ## Motivation
 
-Learn how various package managers work, and how content are downloaded from the internet.
-Improve the way packages are downloaded and managed by implementing a all-in-one binary repository manager
-that can serve multiple packages types, local access or remote access (proxy cache).
+Learn about various package managers and related protocols, and implement them using Golang.
+## Current state
 
-Downloading docker images from docker hub can be slow.
-
-Solution:
+Consuming docker images from docker hub can be slow.
+With a central server (binaryrepo), it can serve docker images from the internet
+and cache them locally.
 
 Binaryrepo serves a caching proxy for any remote registry that implements Docker Registry v2 API.
 Requests are served from its local cache (the file storage), if not available in the cache, requests
 are forwarded to the remote registry, and resources are fetched and saved to the cache for future requests.
+##
+
+Binaryrepo is installed locally using the local /etc/hosts name of docker-remote.example.com,
+The below pull command will fetch redis images from docker hub, and in the process cache this image.
+
+docker pull docker-remote.example.com/redis:latest
+
+Any futher pulls will be served from the cache that binaryrepo hosts.
 
 # Future plans
 
@@ -19,9 +30,6 @@ I plan to implement a local Docker Registry v2, that can be used together with c
 I may also implement support for other package types such as Go modules and Helm packages.
 
 # binary-repo
-
-Please add a small section about the problem and how this project solves
-
 
 ### Getting started
 
