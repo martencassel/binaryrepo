@@ -1,34 +1,29 @@
 # About this project
+## Motivation
+
+Study various package managers and related protocols. For example, Docker Registry v2, Go Module registries, Helm registries etc.
+Build a tool from scratch, simmiliar or identical to tools like Artifactory or Nexus (binary repository manager)
+## Problem
+
+Performance of package managers (docker, helm, or go and more) can be significantly improved by
+resuing previously fetched resources from the internet to a local central shared cache server.
+
+A shared cache stores responses to be reused by more than one user. For example, multiple users may need
+to download the postgres:latest image from docker hub. By setting up a package cache server on the local network
+it may serve many users so that popular docker images are reused a number of times, reducing
+network traffic and latency.
 
 This project tries to implement a binary artifact manager server that can serve software packages such as
 Docker images, Helm charts or Go modules etc, either from a local storage or from remote sources (caching proxy).
 All binary packages are stored in a "single-instance-store" using a checksum scheme.
-## Motivation
-
-Learn about various package managers and related protocols, and implement them using Golang.
 ## Current state
 
-Consuming docker images from docker hub can be slow.
-With a central server (binaryrepo), it can serve docker images from the internet
-and cache them locally.
-
-Binaryrepo serves a caching proxy for any remote registry that implements Docker Registry v2 API.
-Requests are served from its local cache (the file storage), if not available in the cache, requests
-are forwarded to the remote registry, and resources are fetched and saved to the cache for future requests.
-##
-
-Binaryrepo is installed locally using the local /etc/hosts name of docker-remote.example.com,
-The below pull command will fetch redis images from docker hub, and in the process cache this image.
-
-docker pull docker-remote.example.com/redis:latest
-
-Any futher pulls will be served from the cache that binaryrepo hosts.
+Binaryrepo is a server that serves a proxy cache for any docker registry that implements the Docker Registry v2 procotol.
+In the current setup, public docker images can be pulled through it.
 
 # Future plans
 
-I plan to implement a local Docker Registry v2, that can be used together with caching proxy functionality.
-I may also implement support for other package types such as Go modules and Helm packages.
-
+More features might be implemented.
 # binary-repo
 
 ### Getting started
