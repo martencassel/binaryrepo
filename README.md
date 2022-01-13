@@ -21,6 +21,8 @@ All binary packages are stored in a "single-instance-store" using a checksum sch
 Binaryrepo is a server that serves a proxy cache for any docker registry that implements the Docker Registry v2 procotol.
 In the current setup, public docker images can be pulled through it.
 
+Due to limitations in the docker client, a reverse proxy (nginx) must be setup infront of the binaryrepo server,
+in order to be able to pull images through the binaryrepo server from docker hub.
 ## Future plans
 
 More features might be implemented.
