@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"regexp"
 	"strings"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/docker/distribution/manifest/manifestlist"
 	"github.com/docker/distribution/manifest/schema2"
+	log "github.com/rs/zerolog/log"
 )
 
 type Registry struct {
@@ -113,7 +113,7 @@ func (r *Registry) getJSON(ctx context.Context, url string, response interface{}
 		return nil, err
 	}
 	defer resp.Body.Close()
-	log.Printf("registry.registry resp.Status=%s", resp.Status)
+	log.Info().Msgf("registry.registry resp.Status=%s", resp.Status)
 	if err := json.NewDecoder(resp.Body).Decode(response); err != nil {
 		return nil, err
 	}

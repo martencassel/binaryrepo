@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -16,6 +15,7 @@ import (
 
 	filestore "github.com/martencassel/binaryrepo/pkg/filestore/fs"
 	"github.com/martencassel/binaryrepo/pkg/repo"
+	log "github.com/rs/zerolog/log"
 )
 
 func TestBlob(t *testing.T) {
@@ -104,7 +104,7 @@ func TestBlob(t *testing.T) {
 		uploadPath := fmt.Sprintf("/tmp/filestore/uploads/%s", uuid)
 		err := ioutil.WriteFile(uploadPath, []byte(""), 0644)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal().Msg(err.Error())
 		}
 		blob, err := ioutil.ReadFile("./testdata/7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631.json")
 		if err != nil {

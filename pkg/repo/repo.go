@@ -1,6 +1,8 @@
 package repo
 
-import "log"
+import (
+	log "github.com/rs/zerolog/log"
+)
 
 type RepoType int64
 
@@ -44,13 +46,13 @@ func (index *RepoIndex) AddRepo(repo Repo) {
 }
 
 func (index *RepoIndex) GetRepos() []Repo {
-	log.Println(index)
+	log.Info().Msgf("%v", index)
 	return index.Repos
 }
 
 func (index *RepoIndex) FindRepo(name string) *Repo {
-	log.Println("FindRepo: ", name)
-	log.Println(index.Repos)
+	log.Info().Msgf("FindRepo: ", name)
+	log.Info().Msgf("%v", index.Repos)
 	for i, repo := range index.Repos {
 		if repo.Name == name {
 			return &index.Repos[i]

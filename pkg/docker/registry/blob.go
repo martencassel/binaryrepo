@@ -4,13 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	digest "github.com/opencontainers/go-digest"
+	log "github.com/rs/zerolog/log"
 )
 
 // PathInitBlobUpload URL.
@@ -25,11 +25,11 @@ func (registry *DockerRegistry) InitBlobUpload(rw http.ResponseWriter, r *http.R
 		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
-	log.Printf("%s /v2/%s/blobs/uploads", http.MethodPost, name)
+	log.Info().Msgf("%s /v2/%s/blobs/uploads", http.MethodPost, name)
 	uuid, _ := uuid.NewUUID()
 	err := ioutil.WriteFile(fmt.Sprintf("%s/uploads/%s", registry.fs.BasePath, uuid.String()), []byte{}, 0644)
 	if err != nil {
-		log.Fatal(err)
+		log.Error().Msg(err.Error())
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}

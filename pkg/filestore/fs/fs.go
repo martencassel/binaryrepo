@@ -3,10 +3,10 @@ package filestore
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 
 	digest "github.com/opencontainers/go-digest"
+	log "github.com/rs/zerolog/log"
 )
 
 type FileStore struct {
@@ -19,11 +19,11 @@ func NewFileStore(basePath string) *FileStore {
 	}
 	err := os.MkdirAll(basePath, 0755)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Msg(err.Error())
 	}
 	err = os.MkdirAll(basePath+"/uploads", 0755)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Msg(err.Error())
 	}
 	return fs
 }
@@ -46,7 +46,7 @@ func (fs *FileStore) Remove(digest digest.Digest) error {
 	filePath, _, _ := getFilePath(fs.BasePath, digest)
 	err := os.Remove(filePath)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Msg(err.Error())
 		return err
 	}
 	return nil
@@ -63,12 +63,12 @@ func (fs *FileStore) WriteFile(b []byte) (digest.Digest, error) {
 	filePath, folderPath, _ := getFilePath(fs.BasePath, digest)
 	err := os.MkdirAll(folderPath, 0755)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Msg(err.Error())
 		return digest.Algorithm().FromString(""), err
 	}
 	err = ioutil.WriteFile(filePath, b, 0644)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Msg(err.Error())
 		return digest.Algorithm().FromString(""), err
 	}
 	return digest, nil
@@ -85,7 +85,7 @@ func (fs *FileStore) ReadFile(digest digest.Digest) ([]byte, error) {
 	}
 	b, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Msg(err.Error())
 	}
 	return b, nil
 }

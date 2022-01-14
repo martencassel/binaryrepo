@@ -1,16 +1,16 @@
 package dockerproxy
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	filestore "github.com/martencassel/binaryrepo/pkg/filestore/fs"
 	repo "github.com/martencassel/binaryrepo/pkg/repo"
+	log "github.com/rs/zerolog/log"
 )
 
 func RegisterHandlers(r *mux.Router, fs *filestore.FileStore, repoIndex *repo.RepoIndex) {
-	log.Print("Registering docker proxy handlers")
+	log.Info().Msgf("Registering docker proxy handlers")
 	p := NewDockerProxyApp()
 	p.index = repoIndex
 	r.HandleFunc(PathVersionUrl1, p.VersionHandler).Methods(http.MethodGet)

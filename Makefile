@@ -40,15 +40,11 @@ reverse-proxy:
 	bash ./utils/docker-nginx/start-nginx.sh
 
 .PHONY: start
-start: stop build
+start:  build
 	unset http_proxy
 	unset https_proxy
 	./build//binaryrepo run > binaryrepo.log 2> binaryrepo.log &
 	tail -f binaryrepo.log
-
-.PHONY: stop
-stop:
-	kill `pidof binaryrepo`
 
 .PHONY: stop
 stop:

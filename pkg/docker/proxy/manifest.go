@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/mux"
 	regclient "github.com/martencassel/binaryrepo/pkg/docker/client"
 	repo "github.com/martencassel/binaryrepo/pkg/repo"
+	log "github.com/rs/zerolog/log"
 )
 
 // PathGetManifest URL.
@@ -19,7 +19,7 @@ const PathGetManifest2 = "/repo/{repo-name}/v2/{namespace}/{namespace2}/manifest
 
 func (p *DockerProxyApp) GetManifestHandler(w http.ResponseWriter, req *http.Request) {
 	opt := GetOptions(req)
-	log.Printf("%s %s\n", req.Method, req.URL.Path)
+	log.Info().Msgf("%s %s\n", req.Method, req.URL.Path)
 	_repo := p.index.FindRepo(opt.repoName)
 	if _repo == nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -40,14 +40,14 @@ func (p *DockerProxyApp) GetManifestHandler(w http.ResponseWriter, req *http.Req
 		Insecure: false,
 	})
 	if err != nil {
-		log.Printf("Error creating registry client: %s\n", err)
+		log.Error().Msgf("Error creating registry client: %s\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	path := fmt.Sprintf("library/%s", opt.namespace)
 	_, resp, err := r.Digest(ctx, regclient.Image{Domain: "docker.io", Path: path, Tag: opt.reference})
 	if err != nil {
-		log.Printf("Error getting digest: %s\n", err)
+		log.Error().Msgf("Error getting digest: %s\n", err)
 	}
 	copyResponse(w, resp)
 }
@@ -57,7 +57,7 @@ func copyResponse(w http.ResponseWriter, resp *http.Response) {
 	w.WriteHeader(resp.StatusCode)
 	_, err := io.Copy(w, resp.Body)
 	if err != nil {
-		log.Printf("Error copying response body: %s\n", err)
+		log.Error().Msgf("Error copying response body: %s\n", err)
 	}
 }
 
@@ -80,7 +80,7 @@ func (p *DockerProxyApp) HeadManifestHandler(w http.ResponseWriter, req *http.Re
 	repoName := vars["repo-name"]
 	_repo = p.index.FindRepo(repoName)
 	if _repo == nil {
-		log.Printf("Repo %s was not found", repoName)
+		log.Error().Msgf("Repo %s was not found", repoName)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -101,14 +101,14 @@ func (p *DockerProxyApp) HeadManifestHandler(w http.ResponseWriter, req *http.Re
 		Insecure: false,
 	})
 	if err != nil {
-		log.Printf("Error creating registry client: %s\n", err)
+		log.Error().Msgf("Error creating registry client: %s\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	path := fmt.Sprintf("library/%s", opt.namespace)
 	_, resp, err := r.Digest(ctx, regclient.Image{Domain: "docker.io", Path: path, Tag: opt.reference})
 	if err != nil {
-		log.Printf("Error getting digest: %s\n", err)
+		log.Error().Msgf("Error getting digest: %s\n", err)
 	}
 	copyResponse(w, resp)
 }

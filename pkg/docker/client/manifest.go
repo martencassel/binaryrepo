@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"io/ioutil"
-	"log"
 	"net/http"
+
+	log "github.com/rs/zerolog/log"
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/manifest/manifestlist"
@@ -50,7 +51,8 @@ func (r *Registry) ManifestList(ctx context.Context, repository, ref string) (ma
 	log.Printf("registry.manifests uri=%s repository=%s ref=%s", uri, repository, ref)
 	var m manifestlist.ManifestList
 	if _, err := r.getJSON(ctx, uri, &m); err != nil {
-		log.Printf("registry.manifests response=%v", m)
+		log.Info().Msg(err.Error())
+		log.Info().Msgf("registry.manifests response=%v", m)
 		return m, err
 	}
 	return m, nil
@@ -59,10 +61,10 @@ func (r *Registry) ManifestList(ctx context.Context, repository, ref string) (ma
 // ManifestV2 gets the registry v2 manifest.
 func (r *Registry) ManifestV2(ctx context.Context, repository, ref string) (schema2.Manifest, error) {
 	uri := r.url("/v2/%s/manifests/%s", repository, ref)
-	log.Printf("registry.manifests uri=%s repository=%s ref=%s", uri, repository, ref)
+	log.Info().Msgf("registry.manifests uri=%s repository=%s ref=%s", uri, repository, ref)
 	var m schema2.Manifest
 	if _, err := r.getJSON(ctx, uri, &m); err != nil {
-		log.Printf("registry.manifests response=%v", m)
+		log.Info().Msgf("registry.manifests response=%v", m)
 		return m, err
 	}
 	if m.Versioned.SchemaVersion != 2 {
@@ -74,10 +76,10 @@ func (r *Registry) ManifestV2(ctx context.Context, repository, ref string) (sche
 // ManifestV1 gets the registry v1 manifest.
 func (r *Registry) ManifestV1(ctx context.Context, repository, ref string) (schema1.SignedManifest, error) {
 	uri := r.url("/v2/%s/manifests/%s", repository, ref)
-	log.Printf("registry.manifests uri=%s repository=%s ref=%s", uri, repository, ref)
+	log.Info().Msgf("registry.manifests uri=%s repository=%s ref=%s", uri, repository, ref)
 	var m schema1.SignedManifest
 	if _, err := r.getJSON(ctx, uri, &m); err != nil {
-		log.Printf("registry.manifests response=%v", m)
+		log.Info().Msgf("registry.manifests response=%v", m)
 		return m, err
 	}
 	if m.Versioned.SchemaVersion != 1 {

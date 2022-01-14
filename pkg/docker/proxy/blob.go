@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -13,6 +12,7 @@ import (
 	regclient "github.com/martencassel/binaryrepo/pkg/docker/client"
 	repo "github.com/martencassel/binaryrepo/pkg/repo"
 	"github.com/opencontainers/go-digest"
+	log "github.com/rs/zerolog/log"
 )
 
 // PathGetBlob URL.
@@ -47,30 +47,30 @@ func GetOptions(req *http.Request) HandlerOptions {
 }
 
 func PrintOptions(req *http.Request, opt HandlerOptions) {
-	log.Printf("%s %s", req.Method, req.URL.Path)
-	log.Printf("Repo Name: %s, Namespace: %s, Digest: %s, Namespace 1: %s, Namespace 2: %s", opt.repoName, opt.namespace, opt.digest, opt.namespace1, opt.namespace2)
+	log.Info().Msgf("%s %s", req.Method, req.URL.Path)
+	log.Info().Msgf("Repo Name: %s, Namespace: %s, Digest: %s, Namespace 1: %s, Namespace 2: %s", opt.repoName, opt.namespace, opt.digest, opt.namespace1, opt.namespace2)
 }
 
 func (p *DockerProxyApp) DownloadLayer(w http.ResponseWriter, req *http.Request) {
-	log.Printf("%s %s", req.Method, req.URL.Path)
+	log.Info().Msgf("%s %s", req.Method, req.URL.Path)
 	opt := GetOptions(req)
 	if opt.repoName == "" {
-		log.Printf("No repo name")
+		log.Info().Msgf("No repo name")
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 	var _repo *repo.Repo
 	if p.index.FindRepo(opt.repoName) == nil {
-		log.Printf("Repo %s was not found", opt.repoName)
+		log.Info().Msgf("Repo %s was not found", opt.repoName)
 		w.WriteHeader(http.StatusNotFound)
 	}
 	PrintOptions(req, opt)
-	log.Printf("Digest: %s\n", opt.digest)
+	log.Info().Msgf("Digest: %s\n", opt.digest)
 	// Check if digest exists in filestore, if so
 	// then read file and write it to response writer
 	digest, err := digest.Parse(opt.digest)
 	if err != nil {
-		log.Printf("Digest is invalid %s", err)
+		log.Info().Msgf("Digest is invalid %s", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 	blobExists := p.fs.Exists(digest)
@@ -82,7 +82,7 @@ func (p *DockerProxyApp) DownloadLayer(w http.ResponseWriter, req *http.Request)
 		w.Header().Set("Content-Length", strconv.Itoa(len(b)))
 		_, err = w.Write(b)
 		if err != nil {
-			log.Printf("Error writing to response writer %s", err)
+			log.Info().Msgf("Error writing to response writer %s", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
@@ -92,7 +92,7 @@ func (p *DockerProxyApp) DownloadLayer(w http.ResponseWriter, req *http.Request)
 	// and write the response to response writer.
 	_repo = p.index.FindRepo(opt.repoName)
 	if _repo == nil {
-		log.Printf("Repo %s was not found", opt.repoName)
+		log.Info().Msgf("Repo %s was not found", opt.repoName)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -112,30 +112,28 @@ func (p *DockerProxyApp) DownloadLayer(w http.ResponseWriter, req *http.Request)
 		Insecure: false,
 	})
 	if err != nil {
-		log.Printf("Error creating registry client: %s\n", err)
+		log.Error().Msgf("Error creating registry client: %s\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	path := fmt.Sprintf("library/%s", opt.namespace)
 	_, resp, err := r.DownloadLayer(ctx, path, digest)
 	if err != nil {
-		log.Printf("Error getting digest: %s\n", err)
+		log.Error().Msgf("Error getting digest: %s\n", err)
 	}
-
 	// Save file to cache
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("Error reading response body: %s\n", err)
+		log.Error().Msgf("Error reading response body: %s\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	defer resp.Body.Close()
 	_, err = p.fs.WriteFile(bodyBytes)
 	if err != nil {
-		log.Printf("Error writing to cache: %s\n", err)
+		log.Error().Msgf("Error writing to cache: %s\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 	copyResponse(w, resp)
 }
