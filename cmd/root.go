@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -28,5 +29,13 @@ func Execute() {
 	r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%s %s", r.Method, r.URL)
 	})
-	log.Logger.Fatal().Err(http.ListenAndServe(":8081", r))
+	srv := &http.Server{
+		ReadTimeout:       1 * time.Second,
+		WriteTimeout:      1 * time.Second,
+		IdleTimeout:       30 * time.Second,
+		ReadHeaderTimeout: 2 * time.Second,
+		Handler:           r,
+		Addr:              ":8080",
+	}
+	log.Logger.Fatal().Err(srv.ListenAndServe())
 }
