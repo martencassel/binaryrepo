@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 
-	"github.com/martencassel/binaryrepo/cmd"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -14,5 +13,5 @@ func init() {
 }
 
 func main() {
-	cmd.Execute()
+	execute()
 }

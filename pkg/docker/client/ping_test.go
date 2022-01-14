@@ -3,12 +3,9 @@ package client
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"testing"
 	"time"
-
-	"github.com/joho/godotenv"
 )
 
 func TestPingable(t *testing.T) {
@@ -33,13 +30,11 @@ func TestPingable(t *testing.T) {
 }
 
 func TestPingDockerHubAuth(t *testing.T) {
-	err := godotenv.Load("local.env")
-	if err != nil {
-		log.Fatalf("Some error occured. Err: %s", err)
-	}
 	hubUser := os.Getenv("DOCKERHUB_USERNAME")
 	hubPass := os.Getenv("DOCKERHUB_PASSWORD")
-
+	if hubUser == "" || hubPass == "" {
+		t.Skip("DOCKERHUB_USERNAME and DOCKERHUB_PASSWORD must be set")
+	}
 	ctx := context.Background()
 	authConfig := &AuthConfig{
 		Username:      hubUser,
@@ -64,13 +59,12 @@ func TestPingDockerHubAuth(t *testing.T) {
 }
 
 func TestPingACRAuth(t *testing.T) {
-	err := godotenv.Load("local.env")
-	if err != nil {
-		log.Fatalf("Some error occured. Err: %s", err)
-	}
 	acrUser := os.Getenv("ACR_USERNAME")
 	acrPass := os.Getenv("ACR_PASSWORD")
 	acrServerAddress := os.Getenv("ACR_SERVER")
+	if acrUser == "" || acrPass == "" || acrServerAddress == "" {
+		t.Skip("ACR_USERNAME, ACR_PASSWORD and ACR_SERVER must be set")
+	}
 	ctx := context.Background()
 	authConfig := &AuthConfig{
 		Username:      acrUser,

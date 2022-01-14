@@ -46,8 +46,8 @@ func TestFetchBlob(t *testing.T) {
 		req = mux.SetURLVars(req, vars)
 		p.DownloadLayer(rec, req)
 		res := rec.Result()
-		assert.Equal(t, http.StatusTemporaryRedirect, res.StatusCode)
-		assert.Equal(t, "/repo/docker-remote/v2/blob/sha256:7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631", res.Header.Get("Location"))
+		assert.Equal(t, http.StatusOK, res.StatusCode)
+		assert.Equal(t, res.Header.Get("Content-Type"), "application/octet-stream")
 	})
 }
 

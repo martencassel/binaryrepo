@@ -1,3 +1,5 @@
+APP_VERSION?=$(shell git rev-parse --short HEAD)
+
 GO_SRCS := $(shell find . -type f -name '*.go' -a ! -name 'zz_generated*')
 
 # binaryrepo run on linux
@@ -8,12 +10,10 @@ GO ?= go
 golint := $(shell which golangci-lint)
 
 .PHONY: build
-build: lint binaryrepo
+build: lint
+	go build ./...
 
 TARGET_OS ?= linux
-
-binaryrepo: $(GO_SRCS)
-	GOOS=$(TARGET_OS) GOARCH=$(GOARCH) $(GO) build -o $@ main.go
 
 .PHONY: check-remote-pull
 check-remote-pull: build reverse-proxy start
@@ -40,10 +40,15 @@ reverse-proxy:
 	bash ./utils/docker-nginx/start-nginx.sh
 
 .PHONY: start
-start: binaryrepo
+start: stop build
 	unset http_proxy
 	unset https_proxy
-	./binaryrepo > binaryrepo.log 2> binaryrepo.log &
+	./build//binaryrepo run > binaryrepo.log 2> binaryrepo.log &
+	tail -f binaryrepo.log
+
+.PHONY: stop
+stop:
+	kill `pidof binaryrepo`
 
 .PHONY: stop
 stop:
@@ -63,3 +68,15 @@ clear-local-images:
 .PHONY: clear-binaryrepo-cache
 clear-binaryrepo-cache:
 	rm -rf /tmp/filestore
+
+BUILD_DIR := build
+
+.PHONY: server
+server:
+	mkdir -p $(BUILD_DIR)
+	go build -o $(BUILD_DIR)/binaryrepo -ldflags "-X github.com/martencassel/binaryrepo/pkg/util/version.V=$(APP_VERSION)" ./cmd/binary-repo
+
+.PHONY: clean
+clean:
+	go clean ./...
+
