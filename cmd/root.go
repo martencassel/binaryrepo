@@ -35,7 +35,7 @@ func Execute() {
 		IdleTimeout:       30 * time.Second,
 		ReadHeaderTimeout: 2 * time.Second,
 		Handler:           r,
-		Addr:              ":8080",
+		Addr:              ":8081",
 	}
 	log.Logger.Fatal().Err(srv.ListenAndServe())
 }
