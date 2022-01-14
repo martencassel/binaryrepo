@@ -5,17 +5,12 @@ Study various package managers and related protocols. For example, Docker Regist
 Build a tool from scratch, simmiliar or identical to tools like Artifactory or Nexus (binary repository manager)
 ## Problem
 
-Performance of package managers (docker, helm, or go and more) can be significantly improved by
-resuing previously fetched resources from the internet to a local central shared cache server.
+Performance of package managers (Docker, Helm, Go etc) can be significantly improved by reusing previously fetched resources from the internet to a shared cache server.
 
-A shared cache stores responses to be reused by more than one user. For example, multiple users may need
-to download the postgres:latest image from docker hub. By setting up a package cache server on the local network
-it may serve many users so that popular docker images are reused a number of times, reducing
-network traffic and latency.
-
-This project tries to implement a binary artifact manager server that can serve software packages such as
-Docker images, Helm charts or Go modules etc, either from a local storage or from remote sources (caching proxy).
-All binary packages are stored in a "single-instance-store" using a checksum scheme.
+Binaryrepo is a shared cache server that store responses to be reused by more than one user.
+Multiple users may need to download a certain package from a repository on the internet.
+By setting up a shared cache on the local network it may serve many users so that popular packages are
+resused a number of times, reducing network traffic and latency.
 ## Current state
 
 Binaryrepo is a server that serves a proxy cache for any docker registry that implements the Docker Registry v2 procotol.
