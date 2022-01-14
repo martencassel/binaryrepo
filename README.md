@@ -13,8 +13,7 @@ By setting up a shared cache on the local network it may serve many users so tha
 resused a number of times, reducing network traffic and latency.
 ## Current state
 
-Binaryrepo is a server that serves a proxy cache for any docker registry that implements the Docker Registry v2 procotol.
-In the current setup, public docker images can be pulled through it.
+Binaryrepo can proxy Docker Hub, and it supports proxy caching images from docker hub.
 
 Due to limitations in the docker client, a reverse proxy (nginx) must be setup infront of the binaryrepo server,
 in order to be able to pull images through the binaryrepo server from docker hub.
