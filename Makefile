@@ -43,7 +43,7 @@ reverse-proxy:
 start: binaryrepo
 	unset http_proxy
 	unset https_proxy
-	./binaryrepo &
+	./binaryrepo > binaryrepo.log &
 
 .PHONY: stop
 stop:
@@ -53,3 +53,9 @@ stop:
 setup-certs:
 	bash ./utils/docker-nginx/setup-certs.sh
 
+.PHONY: clear-local-images
+clear-local-images:
+	docker rmi -f docker-remote.example.com/redis:latest
+	docker rmi -f docker-remote.example.com/postgres:latest
+	docker rmi -f redis:latest
+	docker rmi -f postgres:latest
