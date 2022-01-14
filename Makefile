@@ -43,7 +43,7 @@ reverse-proxy:
 start: binaryrepo
 	unset http_proxy
 	unset https_proxy
-	./binaryrepo > binaryrepo.log &
+	./binaryrepo > binaryrepo.log 2> binaryrepo.log &
 
 .PHONY: stop
 stop:
