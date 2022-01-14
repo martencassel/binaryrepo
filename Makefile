@@ -59,3 +59,7 @@ clear-local-images:
 	docker rmi -f docker-remote.example.com/postgres:latest
 	docker rmi -f redis:latest
 	docker rmi -f postgres:latest
+
+.PHONY: clear-binaryrepo-cache
+clear-binaryrepo-cache:
+	rm -rf /tmp/filestore
