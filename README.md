@@ -55,6 +55,22 @@ Start nginx
 make reverse-proxy
 ```
 
+Currently binaryrepo only supports accessing docker hub using an hub account.
+It's possible to pull images from docker hub, without an account. But this is not implemented yet.
+
+These environment variables must be set before starting binaryrepo
+
+```bash
+export DOCKERHUB_USERNAME=<your username>
+export DOCKERHUB_PASSWORD=<your password>
+```
+
+Start binaryrepo
+```bash
+make stop
+make start
+```
+
 ## Run some tests
 The following command will
 
