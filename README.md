@@ -77,21 +77,6 @@ Start binaryrepo
 make stop
 make start
 ```
-
-## Run some tests
-The following command will
-
-1. Clear the local docker cache.
-2. Pull images from binaryrepo (docker image pull) through nginx at docker-remote.example.com/v2/* endpoints
-3. Binaryrepo will poulate it's cache in /tmp/filestore/*
-4. The local docker cache will be cleared again.
-5. Pull the same images as in step 2.
-6. Now images will be served from binaryrepo's cache under /tmp/filestore/*
-
-```bash
-make test
-```
-
 ## Code
 
 The docker proxy
