@@ -12,6 +12,10 @@ resused a number of times, reducing network traffic and latency.
 
 * Proxy caching images from docker hub using a docker hub login
 
+## Demo
+
+[![asciicast](https://asciinema.org/a/gibKejkPbnkg7eVayrMuIdYAu.svg)](https://asciinema.org/a/gibKejkPbnkg7eVayrMuIdYAu)
+
 ## Reverse proxy and docker client
 
 Due to limitations in the docker client, a reverse proxy (nginx) must be
