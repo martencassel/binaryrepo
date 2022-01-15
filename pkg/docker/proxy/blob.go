@@ -4,10 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -91,7 +89,6 @@ func (p *DockerProxyApp) DownloadLayer(w http.ResponseWriter, req *http.Request)
 	log.Print(digest, opt)
 	ctx := context.Background()
 	scope := fmt.Sprintf("repository:library/%s:pull", opt.namespace)
-
 	r, err := p.NewRegistryClient("docker.io", _repo.Username, _repo.Password, scope, _repo.URL)
 	if err != nil {
 		log.Error().Msgf("Error creating registry client: %s\n", err)
@@ -103,62 +100,28 @@ func (p *DockerProxyApp) DownloadLayer(w http.ResponseWriter, req *http.Request)
 	if err != nil {
 		log.Error().Msgf("Error getting digest: %s\n", err)
 	}
-
 	log.Info().Msgf("DownloadLayer: Status: %s\n", resp.Status)
-
 	if resp.StatusCode == http.StatusTemporaryRedirect {
 		log.Info().Msgf("Redirecting to: %s", resp.Header.Get("Location"))
 	}
-	// Save file to cache
-
-	/*var bodyBytes []byte
-	if resp.Request.Body != nil {
-		bodyBytes, _ = ioutil.ReadAll(resp.Request.Body)
-	}
-	// Restore the io.ReadCloser to its original state
-	resp.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))*/
-
-	log.Info().Msgf("Content-Length: %s", resp.Header.Get("Content-Length"))
-
-	log.Info().Msg("Here layer response:")
-	//	log.Info().Msgf("Layer response body length = %d", len(bodyBytes))
-
-	if resp.Request.Body != nil {
-		out, err := os.Create(fmt.Sprintf("/tmp/%s", opt.digest))
-		if err != nil {
-			log.Error().Msgf("Error creating file: %s\n", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		defer out.Close()
-		n, err := io.Copy(out, resp.Body)
-		if err != nil {
-			log.Error().Msgf("Error copying file: %s\n", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		log.Info().Msgf("Copied %d bytes to file %s \n", n, out.Name())
-		bodyBytes, _ := ioutil.ReadFile(out.Name())
-		resp.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+	var bodyBytes []byte
+	if resp.Body != nil {
+		bodyBytes, err = ioutil.ReadAll(resp.Request.Body)
 		if err != nil {
 			log.Error().Msgf("Error reading response body: %s\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
-			return
 		}
-		b, err := ioutil.ReadFile(out.Name())
-		if err != nil {
-			log.Error().Msgf("Error reading file: %s\n", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		_, err = p.fs.WriteFile(b)
+		d, err := p.fs.WriteFile(bodyBytes)
 		if err != nil {
 			log.Error().Msgf("Error writing to cache: %s\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		// Restore the io.ReadCloser to its original state
+		resp.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+		log.Info().Msgf("Digest: %s", d.String())
 	}
-
+	log.Info().Msgf("Content-Length: %s", resp.Header.Get("Content-Length"))
+	log.Info().Msg("Here layer response:")
 	copyResponse(w, resp)
 }

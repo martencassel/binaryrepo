@@ -39,7 +39,7 @@ reverse-proxy:
 start:  build
 	unset http_proxy
 	unset https_proxy
-	./build//binaryrepo run > binaryrepo.log 2> binaryrepo.log &
+	./build/binaryrepo run > binaryrepo.log 2> binaryrepo.log &
 	tail -f binaryrepo.log
 
 .PHONY: stop
@@ -51,7 +51,7 @@ setup-certs:
 	bash ./utils/docker-nginx/setup-certs.sh
 
 .PHONY: clear-local-images
-clear-local-images:
+clear-local-test-images:
 	docker rmi -f docker-remote.example.com/redis:latest
 	docker rmi -f docker-remote.example.com/postgres:latest
 	docker rmi -f redis:latest
@@ -74,8 +74,6 @@ clean:
 	rm -rf ./build
 
 .PHONY: test
-test:
-	docker rmi -f docker-remote.example.com/redis:latest
-	docker rmi -f docker-remote.example.com/postgres:latest
+test: clear-local-test-images
 	docker image pull docker-remote.example.com/redis:latest
 	docker image pull docker-remote.example.com/postgres:latest

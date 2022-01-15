@@ -43,11 +43,22 @@ var runCmd = &cobra.Command{
 		r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			log.Printf("%s %s", r.Method, r.URL)
 		})
+		/*
+			If the timeout are to low, DownloadLayer handler will failed with an error such as
+
+				Error copying response: readfrom tcp [::1]:8081->[::1]:54774: write tcp [::1]:8081->[::1]:54774: i/o timeout
+
+			For big layer blobs as in the postgres image
+
+				docker-remote.example.com /v2/postgres/blobs/sha256:794976979956b97dc86e3b99fc0cdcd6385113969574152ba4a6218431f542e9
+
+			This may happen
+		*/
 		srv := &http.Server{
-			ReadTimeout:       10 * time.Second,
-			WriteTimeout:      10 * time.Second,
-			IdleTimeout:       30 * time.Second,
-			ReadHeaderTimeout: 2 * time.Second,
+			ReadTimeout:       60 * time.Second,
+			WriteTimeout:      60 * time.Second,
+			IdleTimeout:       60 * time.Second,
+			ReadHeaderTimeout: 60 * time.Second,
 			Handler:           r,
 			Addr:              ":8081",
 		}
