@@ -74,6 +74,14 @@ clean:
 	rm -rf ./build
 
 .PHONY: test
-test: clear-local-test-images
+test: clear-local-test-images clear-filestore
+	tree /tmp/filestore
+	docker image pull docker-remote.example.com/redis:latest
+	docker image pull docker-remote.example.com/postgres:latest
+	tree /tmp/filestore
+	docker rmi -f docker-remote.example.com/redis:latest
+	docker rmi -f docker-remote.example.com/postgres:latest
+	docker rmi -f redis:latest
+	docker rmi -f postgres:latest
 	docker image pull docker-remote.example.com/redis:latest
 	docker image pull docker-remote.example.com/postgres:latest

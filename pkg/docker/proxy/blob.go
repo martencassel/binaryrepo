@@ -105,8 +105,10 @@ func (p *DockerProxyApp) DownloadLayer(w http.ResponseWriter, req *http.Request)
 		log.Info().Msgf("Redirecting to: %s", resp.Header.Get("Location"))
 	}
 	var bodyBytes []byte
+	// resp.Body doesn't work
 	if resp.Body != nil {
-		bodyBytes, err = ioutil.ReadAll(resp.Request.Body)
+		log.Info().Msgf("Reading body")
+		bodyBytes, err = ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.Error().Msgf("Error reading response body: %s\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -118,7 +120,7 @@ func (p *DockerProxyApp) DownloadLayer(w http.ResponseWriter, req *http.Request)
 			return
 		}
 		// Restore the io.ReadCloser to its original state
-		resp.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+		resp.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
 		log.Info().Msgf("Digest: %s", d.String())
 	}
 	log.Info().Msgf("Content-Length: %s", resp.Header.Get("Content-Length"))
