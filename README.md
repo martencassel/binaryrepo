@@ -84,8 +84,3 @@ The following command will
 ```bash
 make test
 ```
-## Building
-
-```bash
-make build
-```
