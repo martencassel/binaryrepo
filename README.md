@@ -8,17 +8,24 @@ Binaryrepo is a shared cache server that store responses to be reused by more th
 Multiple users may need to download a certain package from a repository on the internet.
 By setting up a shared cache on the local network it may serve many users so that popular packages are
 resused a number of times, reducing network traffic and latency.
-## Current state
+## Features
 
-Binaryrepo can proxy Docker Hub, and it supports proxy caching images from docker hub.
+* Proxy caching images from docker hub using a docker hub login
 
-Due to limitations in the docker client, a reverse proxy (nginx) must be setup infront of the binaryrepo server,
-in order to be able to pull images through the binaryrepo server from docker hub.
+## Reverse proxy and docker client
+
+Due to limitations in the docker client, a reverse proxy (nginx) must be
+used in order to proxy images through binaryrepo server.
 
 The flow looks like this:
 
 ```bash
-  docker image pull docker-remote.example.com ---> nginx:443 ---> binaryrepo:8081/repo/docker-remote/v2/*
+  1. docker image pull docker-remote.example.com sends requests to docker-remote.example.com that points to nginx.
+     nginx listens on localhost:443.
+  2. nginx sends request to binaryrepo at localhost:8081/repo/docker-remote/v2/*
+  3. binaryrepo server authenticates to docker hub and forwards requests to docker hub
+  4. binaryrepo servers receices image layers etc, and saves it to /tmp/filestore/ cache.
+  5. the docker client is finally being served the pulled data.
 ```
 ## Getting started
 
