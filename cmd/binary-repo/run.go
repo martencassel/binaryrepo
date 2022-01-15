@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -25,14 +26,16 @@ var runCmd = &cobra.Command{
 		log.Info().Str("version", version.AppVersion()).Msg("running server")
 		fs := filestore.NewFileStore("/tmp/filestore")
 		repoIndex := repo.NewRepoIndex()
+		hubUser := os.Getenv("DOCKERHUB_USERNAME")
+		hubPass := os.Getenv("DOCKERHUB_PASSWORD")
 		repoIndex.AddRepo(repo.Repo{
 			ID:       1,
 			Name:     "docker-remote",
 			Type:     repo.Remote,
 			PkgType:  repo.Docker,
 			URL:      "https://registry-1.docker.io",
-			Username: "",
-			Password: "",
+			Username: hubUser,
+			Password: hubPass,
 		})
 		r := mux.NewRouter()
 		//r.PathPrefix("/api").Subrouter()
