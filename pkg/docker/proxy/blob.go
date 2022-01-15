@@ -105,7 +105,6 @@ func (p *DockerProxyApp) DownloadLayer(w http.ResponseWriter, req *http.Request)
 		log.Info().Msgf("Redirecting to: %s", resp.Header.Get("Location"))
 	}
 	var bodyBytes []byte
-	// resp.Body doesn't work
 	if resp.Body != nil {
 		log.Info().Msgf("Reading body")
 		bodyBytes, err = ioutil.ReadAll(resp.Body)
