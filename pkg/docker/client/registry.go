@@ -77,6 +77,11 @@ func newFromTransport(ctx context.Context, auth AuthConfig, transport http.Round
 		URL:    url,
 		Domain: reProtocol.ReplaceAllString(url, ""),
 		Client: &http.Client{
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				log.Info().Msg("There was a redirect!!!")
+				//				return http.ErrUseLastResponse
+				return nil
+			},
 			Timeout:   opt.Timeout,
 			Transport: customTransport,
 		},

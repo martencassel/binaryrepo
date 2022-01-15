@@ -26,11 +26,13 @@ var runCmd = &cobra.Command{
 		fs := filestore.NewFileStore("/tmp/filestore")
 		repoIndex := repo.NewRepoIndex()
 		repoIndex.AddRepo(repo.Repo{
-			ID:      1,
-			Name:    "docker-remote",
-			Type:    repo.Remote,
-			PkgType: repo.Docker,
-			URL:     "https://registry-1.docker.io",
+			ID:       1,
+			Name:     "docker-remote",
+			Type:     repo.Remote,
+			PkgType:  repo.Docker,
+			URL:      "https://registry-1.docker.io",
+			Username: "",
+			Password: "",
 		})
 		r := mux.NewRouter()
 		//r.PathPrefix("/api").Subrouter()
@@ -39,8 +41,8 @@ var runCmd = &cobra.Command{
 			log.Printf("%s %s", r.Method, r.URL)
 		})
 		srv := &http.Server{
-			ReadTimeout:       1 * time.Second,
-			WriteTimeout:      1 * time.Second,
+			ReadTimeout:       10 * time.Second,
+			WriteTimeout:      10 * time.Second,
 			IdleTimeout:       30 * time.Second,
 			ReadHeaderTimeout: 2 * time.Second,
 			Handler:           r,

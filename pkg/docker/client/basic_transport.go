@@ -22,5 +22,8 @@ func (t *BasicTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		}
 	}
 	resp, err := t.Transport.RoundTrip(req)
+	log.Info().Msg("Basic transport:")
+	log.Info().Msgf("%v", resp)
+	log.Info().Msgf("%v", resp.StatusCode)
 	return resp, err
 }

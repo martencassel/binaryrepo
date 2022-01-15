@@ -32,7 +32,7 @@ func (r *Registry) Manifest(ctx context.Context, repository, ref string) (distri
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	//defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err

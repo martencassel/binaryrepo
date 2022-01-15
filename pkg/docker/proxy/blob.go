@@ -1,16 +1,16 @@
 package dockerproxy
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
-	"time"
 
 	"github.com/gorilla/mux"
-	regclient "github.com/martencassel/binaryrepo/pkg/docker/client"
-	repo "github.com/martencassel/binaryrepo/pkg/repo"
 	"github.com/opencontainers/go-digest"
 	log "github.com/rs/zerolog/log"
 )
@@ -59,10 +59,11 @@ func (p *DockerProxyApp) DownloadLayer(w http.ResponseWriter, req *http.Request)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	var _repo *repo.Repo
-	if p.index.FindRepo(opt.repoName) == nil {
+	_repo := p.index.FindRepo(opt.repoName)
+	if _repo == nil {
 		log.Info().Msgf("Repo %s was not found", opt.repoName)
 		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 	PrintOptions(req, opt)
 	log.Info().Msgf("Digest: %s\n", opt.digest)
@@ -87,30 +88,11 @@ func (p *DockerProxyApp) DownloadLayer(w http.ResponseWriter, req *http.Request)
 		}
 		return
 	}
-	// If digest does not exist in filestore, then
-	// Proxy the request to the remote server
-	// and write the response to response writer.
-	_repo = p.index.FindRepo(opt.repoName)
-	if _repo == nil {
-		log.Info().Msgf("Repo %s was not found", opt.repoName)
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
 	log.Print(digest, opt)
 	ctx := context.Background()
 	scope := fmt.Sprintf("repository:library/%s:pull", opt.namespace)
-	r, err := regclient.New(ctx, regclient.AuthConfig{
-		Username:      _repo.Username,
-		Password:      _repo.Password,
-		Scope:         scope,
-		ServerAddress: _repo.URL,
-	}, regclient.Opt{
-		Domain:   "docker.io",
-		SkipPing: false,
-		Timeout:  time.Second * 120,
-		NonSSL:   false,
-		Insecure: false,
-	})
+
+	r, err := p.NewRegistryClient("docker.io", _repo.Username, _repo.Password, scope, _repo.URL)
 	if err != nil {
 		log.Error().Msgf("Error creating registry client: %s\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -121,19 +103,62 @@ func (p *DockerProxyApp) DownloadLayer(w http.ResponseWriter, req *http.Request)
 	if err != nil {
 		log.Error().Msgf("Error getting digest: %s\n", err)
 	}
+
+	log.Info().Msgf("DownloadLayer: Status: %s\n", resp.Status)
+
+	if resp.StatusCode == http.StatusTemporaryRedirect {
+		log.Info().Msgf("Redirecting to: %s", resp.Header.Get("Location"))
+	}
 	// Save file to cache
-	bodyBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Error().Msgf("Error reading response body: %s\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+
+	/*var bodyBytes []byte
+	if resp.Request.Body != nil {
+		bodyBytes, _ = ioutil.ReadAll(resp.Request.Body)
 	}
-	defer resp.Body.Close()
-	_, err = p.fs.WriteFile(bodyBytes)
-	if err != nil {
-		log.Error().Msgf("Error writing to cache: %s\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	// Restore the io.ReadCloser to its original state
+	resp.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))*/
+
+	log.Info().Msgf("Content-Length: %s", resp.Header.Get("Content-Length"))
+
+	log.Info().Msg("Here layer response:")
+	//	log.Info().Msgf("Layer response body length = %d", len(bodyBytes))
+
+	if resp.Request.Body != nil {
+		out, err := os.Create(fmt.Sprintf("/tmp/%s", opt.digest))
+		if err != nil {
+			log.Error().Msgf("Error creating file: %s\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		defer out.Close()
+		n, err := io.Copy(out, resp.Body)
+		if err != nil {
+			log.Error().Msgf("Error copying file: %s\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		log.Info().Msgf("Copied %d bytes to file %s \n", n, out.Name())
+		bodyBytes, _ := ioutil.ReadFile(out.Name())
+		resp.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+		if err != nil {
+			log.Error().Msgf("Error reading response body: %s\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		b, err := ioutil.ReadFile(out.Name())
+		if err != nil {
+			log.Error().Msgf("Error reading file: %s\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		_, err = p.fs.WriteFile(b)
+		if err != nil {
+			log.Error().Msgf("Error writing to cache: %s\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
+
 	copyResponse(w, resp)
 }

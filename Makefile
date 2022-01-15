@@ -10,18 +10,14 @@ GO ?= go
 golint := $(shell which golangci-lint)
 
 .PHONY: build
-build: lint
-	go build ./...
+build: lint server
+
 
 TARGET_OS ?= linux
 
 .PHONY: check-remote-pull
 check-remote-pull: build reverse-proxy start
 	./inttest/remote_docker_pull.sh
-
-.PHONY: clean
-clean:
-	-rm -f ./binaryrepo
 
 .PHONY: lint
 lint:
@@ -61,9 +57,10 @@ clear-local-images:
 	docker rmi -f redis:latest
 	docker rmi -f postgres:latest
 
-.PHONY: clear-binaryrepo-cache
-clear-binaryrepo-cache:
+.PHONY: clear-filestore
+clear-filestore:
 	rm -rf /tmp/filestore
+	mkdir -p /tmp/filestore
 
 BUILD_DIR := build
 
@@ -74,5 +71,5 @@ server:
 
 .PHONY: clean
 clean:
-	go clean ./...
+	rm -rf ./build
 

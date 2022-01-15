@@ -24,9 +24,9 @@ func (r *Registry) Digest(ctx context.Context, image Image) (digest.Digest, *htt
 	req.Header.Add("Accept", schema2.MediaTypeManifest)
 	resp, err := r.Client.Do(req.WithContext(ctx))
 	if err != nil {
-		if resp != nil {
-			defer resp.Body.Close()
-		}
+		/*		if resp != nil {
+				defer resp.Body.Close()
+			}*/
 		return "", resp, err
 	}
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {

@@ -17,6 +17,14 @@ Binaryrepo can proxy Docker Hub, and it supports proxy caching images from docke
 
 Due to limitations in the docker client, a reverse proxy (nginx) must be setup infront of the binaryrepo server,
 in order to be able to pull images through the binaryrepo server from docker hub.
+
+## Issues
+
+docker image pull docker-remote.example.com/postgres:latest
+The layer 794976979956 times out, Its around 10*n MB.
+Need to fix this:
+https://developpaper.com/the-implementation-of-downloading-files-with-http-client-in-golang/
+And check https://cs.opensource.google/go/go/+/go1.17.6:src/net/http/httputil/reverseproxy.go;l=143 implementation.
 ## Future plans
 
 More features might be implemented.

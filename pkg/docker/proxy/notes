@@ -1,5 +1,0 @@
-GET	 /v2/<name>/manifests/<reference>
-HEAD /v2/<name>/manifests/<reference>
-
-GET	 /v2/<name>/blobs/<digest>
-HEAD /v2/<name>/blobs/<digest>

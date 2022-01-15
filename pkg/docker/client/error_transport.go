@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	log "github.com/rs/zerolog/log"
 )
 
 type httpStatusError struct {
@@ -23,6 +25,7 @@ type ErrorTransport struct {
 
 func (t *ErrorTransport) RoundTrip(request *http.Request) (*http.Response, error) {
 	resp, err := t.Transport.RoundTrip(request)
+	log.Info().Msgf("%v", resp)
 	if err != nil {
 		return resp, err
 	}

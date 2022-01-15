@@ -35,7 +35,7 @@ func (r *Registry) HasLayer(ctx context.Context, repository string, digest diges
 	}
 	resp, err := r.Client.Do(req.WithContext(ctx))
 	if err == nil {
-		defer resp.Body.Close()
+		//defer resp.Body.Close()
 		return resp.StatusCode == http.StatusOK, resp, nil
 	}
 	urlErr, ok := err.(*url.Error)
