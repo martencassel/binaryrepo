@@ -73,3 +73,9 @@ server:
 clean:
 	rm -rf ./build
 
+.PHONY: test
+test:
+	docker rmi -f docker-remote.example.com/redis:latest
+	docker rmi -f docker-remote.example.com/postgres:latest
+	docker image pull docker-remote.example.com/redis:latest
+	docker image pull docker-remote.example.com/postgres:latest

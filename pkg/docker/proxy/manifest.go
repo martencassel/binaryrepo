@@ -27,7 +27,7 @@ func (p *DockerProxyApp) GetManifestHandler(w http.ResponseWriter, req *http.Req
 		return
 	}
 	if _repo.Username == "" || _repo.Password == "" {
-		log.Error().Msgf("Repo %s is not authorized", opt.repoName)
+		log.Error().Msgf("Repo %s is not authorized. Add username/password in cmd/binary-repo/run.go", opt.repoName)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
