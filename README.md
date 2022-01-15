@@ -18,17 +18,6 @@ Binaryrepo can proxy Docker Hub, and it supports proxy caching images from docke
 Due to limitations in the docker client, a reverse proxy (nginx) must be setup infront of the binaryrepo server,
 in order to be able to pull images through the binaryrepo server from docker hub.
 
-## Issues
-
-```bash
-docker image pull docker-remote.example.com/postgres:latest
-The layer 794976979956 times out, Its around 10*n MB.
-Need to fix this:
-https://developpaper.com/the-implementation-of-downloading-files-with-http-client-in-golang/
-And check https://cs.opensource.google/go/go/+/go1.17.6:src/net/http/httputil/reverseproxy.go;l=143 implementation.
-https://haisum.github.io/2017/09/11/golang-ioutil-readall/
-```
-
 ## Future plans
 More features might be implemented.
 ## Getting started
@@ -39,35 +28,48 @@ as a remote proxy cache of docker hub.
 Docker pull command will access the remote repo through a local nginx container.
 
 ## Prerequisites
-1. Create certs
+
+Golang, git and make needs to be installed
+
+Create a self-signed cert and add it to the trust store:
 ```bash
 make setup-certs
 ls ~/certs
+# On fedora do this
+sudo cp ./certs/ca.pem /etc/pki/ca-trust/source/anchors/
+sudo update-ca-trust
 ```
-2. Modify /etc/hosts
+
+Add a host entry for the reverse proxy:
 ```bash
 127.0.0.1 docker-remote.example.com
 ```
-## Start everything and run docker pull tests
+
+Build the binary:
 ```bash
-make check-remote-pull
+make build
+```
+
+Start nginx
+```bash
+make reverse-proxy
+```
+
+## Run some tests
+The following command will
+
+1. Clear the local docker cache.
+2. Pull images from binaryrepo (docker image pull) through nginx at docker-remote.example.com/v2/* endpoints
+3. Binaryrepo will poulate it's cache in /tmp/filestore/*
+4. The local docker cache will be cleared again.
+5. Pull the same images as in step 2.
+6. Now images will be served from binaryrepo's cache under /tmp/filestore/*
+
+```bash
+make test
 ```
 ## Building
 
 ```bash
 make build
-```
-## Working demo
-Proxy docker images from docker hub
-
-- Create certs under $HOME/certs/ for nginx, add add the certs to your local cert store.
-- Add docker-remote.example.com to your /etc/hosts file
-- Start binaryrepo server at http://localhost:8081/
-- Start nginx, it will proxies requests from docker-remote.example.com to http://localhost:8081/repo/docker-remote
-- Run docker image pull on some sample images, remove the local images, and then pull again, now from the local cache in binaryrepo
-  (tree /tmp/filestore)
-
-```bash
-make setup-certs
-make check-remote-pull
 ```
