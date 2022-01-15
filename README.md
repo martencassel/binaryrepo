@@ -1,8 +1,5 @@
 # About this project
-## Motivation
 
-Study various package managers and related protocols. For example, Docker Registry v2, Go Module registries, Helm registries etc.
-Build a tool from scratch, simmiliar or identical to tools like Artifactory or Nexus (binary repository manager)
 ## Problem
 
 Performance of package managers (Docker, Helm, Go etc) can be significantly improved by reusing previously fetched resources from the internet to a shared cache server.
@@ -18,8 +15,11 @@ Binaryrepo can proxy Docker Hub, and it supports proxy caching images from docke
 Due to limitations in the docker client, a reverse proxy (nginx) must be setup infront of the binaryrepo server,
 in order to be able to pull images through the binaryrepo server from docker hub.
 
-## Future plans
-More features might be implemented.
+The flow looks like this:
+
+```bash
+  docker image pull docker-remote.example.com ---> nginx:443 ---> binaryrepo:8081/repo/docker-remote/v2/*
+```
 ## Getting started
 
 The following example will setup binaryrepo to be used
