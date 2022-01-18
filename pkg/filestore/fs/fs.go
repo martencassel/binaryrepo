@@ -2,7 +2,6 @@ package filestore
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 
@@ -71,25 +70,6 @@ func (fs *FileStore) WriteFile(b []byte) (digest.Digest, error) {
 	if err != nil {
 		log.Fatal().Msg(err.Error())
 		return digest.Algorithm().FromString(""), err
-	}
-	return digest, nil
-}
-
-func (fs *FileStore) WriteReadCloser(r io.ReadCloser) (digest.Digest, error) {
-	defer r.Close()
-	b, err := ioutil.ReadAll(r)
-	if err != nil {
-		log.Fatal().Msg(err.Error())
-	}
-	digest := digest.FromBytes(b)
-	filePath, folderPath, _ := getFilePath(fs.BasePath, digest)
-	err = os.MkdirAll(folderPath, 0755)
-	if err != nil {
-		log.Fatal().Msg(err.Error())
-	}
-	err = ioutil.WriteFile(filePath, b, 0644)
-	if err != nil {
-		log.Fatal().Msg(err.Error())
 	}
 	return digest, nil
 }
