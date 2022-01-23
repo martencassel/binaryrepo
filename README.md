@@ -15,7 +15,7 @@ resused a number of times, reducing network traffic and latency.
 
 ## Demo
 
-In the demo below, the download time of postgres:latest were reduced from 26s to 7s
+In the demo below, you can see that the the download time of postgres:latest will be reduced
 
 [![asciicast](https://asciinema.org/a/1bHV8eIiAFO4t2G5Azx8HrqLs.svg)](https://asciinema.org/a/1bHV8eIiAFO4t2G5Azx8HrqLs)
 
