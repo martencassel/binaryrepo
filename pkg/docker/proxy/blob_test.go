@@ -73,6 +73,13 @@ func TestCheckBlob(t *testing.T) {
 		}
 		rec := httptest.NewRecorder()
 		p := NewDockerProxyApp()
+		p.index.AddRepo(repo.Repo{
+			ID:      1,
+			Name:    "docker-remote",
+			Type:    repo.Remote,
+			PkgType: repo.Docker,
+			URL:     "https://registry-1.docker.io",
+		})
 		vars := map[string]string{
 			"repo-name": "docker-remote",
 			"namespace": "redis",
@@ -86,6 +93,6 @@ func TestCheckBlob(t *testing.T) {
 			t.Fatal(err)
 		}
 		assert.Equal(t, "201", res.Header.Get("Content-Length"))
-		assert.Equal(t, "sha256:131e916e1a28efae8398ab187eaf75683c6c7ebc71e90f780e19a95465dfd52f", digest.FromBytes(b).String())
+		assert.Equal(t, d, digest.FromBytes(b).String())
 	})
 }
