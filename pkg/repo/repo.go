@@ -51,7 +51,7 @@ func (index *RepoIndex) GetRepos() []Repo {
 }
 
 func (index *RepoIndex) FindRepo(name string) *Repo {
-	log.Info().Msgf("FindRepo: ", name)
+	log.Info().Msgf("FindRepo: %s", name)
 	log.Info().Msgf("%v", index.Repos)
 	for i, repo := range index.Repos {
 		if repo.Name == name {
