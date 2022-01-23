@@ -17,7 +17,8 @@ resused a number of times, reducing network traffic and latency.
 
 In the demo below, the download time of postgres:latest were reduced from 26s to 7s
 
-[![asciicast](https://asciinema.org/a/gibKejkPbnkg7eVayrMuIdYAu.svg)](https://asciinema.org/a/gibKejkPbnkg7eVayrMuIdYAu)
+[![asciicast](https://asciinema.org/a/1bHV8eIiAFO4t2G5Azx8HrqLs.svg)](https://asciinema.org/a/1bHV8eIiAFO4t2G5Azx8HrqLs)
+
 
 ## Reverse proxy and docker client
 
