@@ -86,7 +86,7 @@ func (p *DockerProxyApp) DownloadLayer(w http.ResponseWriter, req *http.Request)
 		}
 		return
 	}
-	log.Print(digest, opt)
+	//	log.Print(digest, opt)
 	ctx := context.Background()
 	scope := fmt.Sprintf("repository:library/%s:pull", opt.namespace)
 	r, err := p.NewRegistryClient("docker.io", _repo.Username, _repo.Password, scope, _repo.URL)
