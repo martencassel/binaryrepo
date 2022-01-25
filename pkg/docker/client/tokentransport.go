@@ -9,8 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
-
-	log "github.com/rs/zerolog/log"
 )
 
 var gcrMatcher = regexp.MustCompile(`https://([a-z]+\.|)gcr\.io/`)
@@ -72,8 +70,8 @@ func (r *Registry) Token(ctx context.Context, url string) (string, error) {
 	if a == nil {
 		return "", nil
 	}
-	log.Info().Msg("Hello")
-	log.Info().Msgf("auth service: %s %s %s %s", a.Service, r.Username, r.Password, r.Scope)
+	//log.Info().Msg("Hello")
+	////log.Info().Msgf("auth service: %s %s %s %s", a.Service, r.Username, r.Password, r.Scope)
 	authReq, err := a.Request(r.Username, r.Password, r.Scope)
 	if err != nil {
 		return "", err

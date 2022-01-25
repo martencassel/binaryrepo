@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/rs/zerolog/log"
 
 	proxy "github.com/martencassel/binaryrepo/pkg/docker/proxy"
 	registry "github.com/martencassel/binaryrepo/pkg/docker/registry"
@@ -46,7 +45,7 @@ func (router *DockerRouter) RegisterHandlers(r *mux.Router) {
 }
 
 func (router *DockerRouter) versionHandler(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("versionHandler %s %s\n", r.Method, r.URL.Path)
+	////log.Info().Msgf("%s %s\n", r.Method, r.URL.Path)
 	vars := mux.Vars(r)
 	repoName := vars["repo-name"]
 	_repo := router.index.FindRepo(repoName)
@@ -63,7 +62,7 @@ func (router *DockerRouter) versionHandler(w http.ResponseWriter, r *http.Reques
 }
 
 func (router *DockerRouter) HeadManifestHandler(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("HeadManifestHandler %s %s\n", r.Method, r.URL.Path)
+	////log.Info().Msgf("%s %s\n", r.Method, r.URL.Path)
 	vars := mux.Vars(r)
 	repoName := vars["repo-name"]
 	_repo := router.index.FindRepo(repoName)
@@ -80,7 +79,7 @@ func (router *DockerRouter) HeadManifestHandler(w http.ResponseWriter, r *http.R
 }
 
 func (router *DockerRouter) GetManifestHandler(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("GetManifestHandler %s %s\n", r.Method, r.URL.Path)
+	////log.Info().Msgf("%s %s\n", r.Method, r.URL.Path)
 	vars := mux.Vars(r)
 	repoName := vars["repo-name"]
 	_repo := router.index.FindRepo(repoName)
@@ -97,7 +96,7 @@ func (router *DockerRouter) GetManifestHandler(w http.ResponseWriter, r *http.Re
 }
 
 func (router *DockerRouter) DownloadLayer(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("DownloadLayer %s %s\n", r.Method, r.URL.Path)
+	////log.Info().Msgf("%s %s\n", r.Method, r.URL.Path)
 	vars := mux.Vars(r)
 	repoName := vars["repo-name"]
 	_repo := router.index.FindRepo(repoName)

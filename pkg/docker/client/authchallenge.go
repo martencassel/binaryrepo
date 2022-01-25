@@ -7,8 +7,6 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
-
-	log "github.com/rs/zerolog/log"
 )
 
 var (
@@ -29,7 +27,7 @@ func parseAuthHeader(header http.Header) (*authService, error) {
 }
 
 func parseChallenge(challengeHeader string) (*authService, error) {
-	log.Info().Msg(challengeHeader)
+	//	//log.Info().Msg(challengeHeader)
 	if basicRegex.MatchString(challengeHeader) {
 		return nil, ErrBasicAuth
 	}

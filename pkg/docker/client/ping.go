@@ -4,8 +4,6 @@ import (
 	"context"
 	"net/http"
 	"strings"
-
-	log "github.com/rs/zerolog/log"
 )
 
 func (r *Registry) Pingable() bool {
@@ -15,7 +13,7 @@ func (r *Registry) Pingable() bool {
 func (r *Registry) Ping(ctx context.Context) error {
 	url := r.url("/v2/")
 	req, err := http.NewRequest("GET", url, nil)
-	log.Info().Msgf("registry.ping url=%s", url)
+	////log.Info().Msgf("registry.ping url=%s", url)
 	if err != nil {
 		return err
 	}

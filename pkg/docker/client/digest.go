@@ -7,7 +7,6 @@ import (
 
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/opencontainers/go-digest"
-	log "github.com/rs/zerolog/log"
 )
 
 func (r *Registry) Digest(ctx context.Context, image Image) (digest.Digest, *http.Response, error) {
@@ -15,8 +14,8 @@ func (r *Registry) Digest(ctx context.Context, image Image) (digest.Digest, *htt
 		return image.Digest, nil, nil
 	}
 	url := r.url("/v2/%s/manifests/%s", image.Path, image.Tag)
-	log.Info().Msgf("manifests.get url=%s repository=%s ref=%s",
-		url, image.Path, image.Tag)
+	////log.Info().Msgf("manifests.get url=%s repository=%s ref=%s",
+	//url, image.Path, image.Tag)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return "", nil, err

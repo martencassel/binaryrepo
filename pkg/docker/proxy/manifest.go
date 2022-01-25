@@ -18,9 +18,9 @@ const PathGetManifest1 = "/repo/{repo-name}/v2/{namespace}/manifests/{reference}
 const PathGetManifest2 = "/repo/{repo-name}/v2/{namespace}/{namespace2}/manifests/{reference}"
 
 func (p *DockerProxyApp) GetManifestHandler(w http.ResponseWriter, req *http.Request) {
-	log.Info().Msgf("GetManifestHandler %s %s\n", req.Method, req.URL.Path)
+	log.Info().Msgf("proxy.getmanifest %s %s", req.Method, req.URL.Path)
 	opt := GetOptions(req)
-	log.Info().Msgf("%s %s\n", req.Method, req.URL.Path)
+	////log.Info().Msgf("%s %s\n", req.Method, req.URL.Path)
 	_repo := p.index.FindRepo(opt.repoName)
 	if _repo == nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -45,12 +45,12 @@ func (p *DockerProxyApp) GetManifestHandler(w http.ResponseWriter, req *http.Req
 		return
 	}
 	path := fmt.Sprintf("library/%s", opt.namespace)
-	d, resp, err := r.Digest(ctx, regclient.Image{Domain: "docker.io", Path: path, Tag: opt.reference})
-	log.Info().Msgf("Digest: %s", d.String())
-	log.Info().Msgf("%v", resp)
+	_, resp, err := r.Digest(ctx, regclient.Image{Domain: "docker.io", Path: path, Tag: opt.reference})
+	//////log.Info().Msgf("Digest: %s", d.String())
+	//////log.Info().Msgf("%v", resp)
 	if err != nil {
-		log.Error().Msgf("Error getting digest: %s\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		log.Error().Msgf("Error getting digest: %s", err)
+		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 	copyResponse(w, resp)
@@ -78,7 +78,7 @@ const PathHeadManifest1 = "/repo/{repo-name}/v2/{namespace}/manifests/{reference
 const PathHeadManifest2 = "/repo/{repo-name}/v2/{namespace1}/{namespace2}/manifests/{reference}"
 
 func (p *DockerProxyApp) HeadManifestHandler(w http.ResponseWriter, req *http.Request) {
-	log.Info().Msgf("HeadManifestHandler %s %s\n", req.Method, req.URL.Path)
+	log.Info().Msgf("proxy.head_manifest %s %s", req.Method, req.URL.Path)
 	opt := GetOptions(req)
 	var _repo *repo.Repo
 	vars := mux.Vars(req)
@@ -94,8 +94,8 @@ func (p *DockerProxyApp) HeadManifestHandler(w http.ResponseWriter, req *http.Re
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	reference := vars["reference"]
-	log.Print(reference, opt)
+	//reference := vars["reference"]
+	//log.Print(reference, opt)
 	ctx := context.Background()
 	scope := fmt.Sprintf("repository:library/%s:pull", opt.namespace)
 	r, err := regclient.New(ctx, regclient.AuthConfig{
@@ -116,11 +116,13 @@ func (p *DockerProxyApp) HeadManifestHandler(w http.ResponseWriter, req *http.Re
 		return
 	}
 	path := fmt.Sprintf("library/%s", opt.namespace)
-	d, resp, err := r.Digest(ctx, regclient.Image{Domain: "docker.io", Path: path, Tag: opt.reference})
-	log.Info().Msgf("Digest: %s", d.String())
-	log.Info().Msgf("%v", resp)
+	_, resp, err := r.Digest(ctx, regclient.Image{Domain: "docker.io", Path: path, Tag: opt.reference})
+	//////log.Info().Msgf("Digest: %s", d.String())
+	//////log.Info().Msgf("%v", resp)
 	if err != nil {
-		log.Error().Msgf("Error getting digest: %s\n", err)
+		log.Error().Msgf("Error getting digest: %s", err)
+		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 	copyResponse(w, resp)
 }

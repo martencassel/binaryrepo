@@ -25,7 +25,7 @@ func (registry *DockerRegistry) InitBlobUpload(rw http.ResponseWriter, r *http.R
 		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
-	log.Info().Msgf("%s /v2/%s/blobs/uploads", http.MethodPost, name)
+	////log.Info().Msgf("%s /v2/%s/blobs/uploads", http.MethodPost, name)
 	uuid, _ := uuid.NewUUID()
 	err := ioutil.WriteFile(fmt.Sprintf("%s/uploads/%s", registry.fs.BasePath, uuid.String()), []byte{}, 0644)
 	if err != nil {
@@ -146,5 +146,5 @@ func IsValidUUID(u string) bool {
 }
 
 func (registry *DockerRegistry) DownloadLayer(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("DownloadLayer %s %s", r.Method, r.URL.Path)
+	////log.Info().Msgf("DownloadLayer %s %s", r.Method, r.URL.Path)
 }

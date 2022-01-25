@@ -50,10 +50,10 @@ var runCmd = &cobra.Command{
 		registry.RegisterHandlers(r, fs, repoIndex)
 
 		r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log.Printf("%s %s", r.Method, r.URL)
-			vars := mux.Vars(r)
-			repoName := vars["repo-name"]
-			log.Info().Msgf("Repo Name: %s", repoName)
+			log.Info().Msgf("not-implemented %s %s", r.Method, r.URL)
+			w.WriteHeader(http.StatusNotFound)
+			//			vars := mux.Vars(r)
+			//			repoName := vars["repo-name"]
 		})
 		/*
 			If the timeout are to low, DownloadLayer handler will failed with an error such as
@@ -74,7 +74,7 @@ var runCmd = &cobra.Command{
 			Handler:           r,
 			Addr:              ":8081",
 		}
-		log.Info().Msgf("Listening on port %s", srv.Addr)
+		////log.Info().Msgf("Listening on port %s", srv.Addr)
 		if err := srv.ListenAndServe(); err != nil {
 			log.Fatal().Err(err).Msg("failed to start server")
 		}

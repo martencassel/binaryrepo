@@ -11,7 +11,6 @@ import (
 
 	"github.com/docker/distribution/manifest/manifestlist"
 	"github.com/docker/distribution/manifest/schema2"
-	log "github.com/rs/zerolog/log"
 )
 
 type Registry struct {
@@ -78,7 +77,7 @@ func newFromTransport(ctx context.Context, auth AuthConfig, transport http.Round
 		Domain: reProtocol.ReplaceAllString(url, ""),
 		Client: &http.Client{
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
-				log.Info().Msg("There was a redirect!!!")
+				//log.Info().Msg("There was a redirect!!!")
 				//				return http.ErrUseLastResponse
 				return nil
 			},
@@ -118,7 +117,7 @@ func (r *Registry) getJSON(ctx context.Context, url string, response interface{}
 		return nil, err
 	}
 	defer resp.Body.Close()
-	log.Info().Msgf("registry.registry resp.Status=%s", resp.Status)
+	////log.Info().Msgf("registry.registry resp.Status=%s", resp.Status)
 	if err := json.NewDecoder(resp.Body).Decode(response); err != nil {
 		return nil, err
 	}
