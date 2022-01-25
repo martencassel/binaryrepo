@@ -20,4 +20,9 @@ func RegisterHandlers(r *mux.Router, fs *filestore.FileStore, repoIndex *repo.Re
 	r.HandleFunc(PathGetManifest2, p.GetManifestHandler).Methods(http.MethodGet)
 	r.HandleFunc(PathGetBlob1, p.DownloadLayer).Methods(http.MethodGet)
 	r.HandleFunc(PathGetBlob2, p.DownloadLayer).Methods(http.MethodGet)
+	r.HandleFunc(PathHeadBlob1, p.HasLayer).Methods(http.MethodHead)
+	r.HandleFunc(PathHeadBlob2, p.HasLayer).Methods(http.MethodHead)
+	r.HandleFunc(PathHeadBlob1, p.LayerPut).Methods(http.MethodPut)
+	r.HandleFunc(PathHeadBlob2, p.LayerPut).Methods(http.MethodPut)
+
 }

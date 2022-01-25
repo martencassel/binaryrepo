@@ -51,7 +51,6 @@ var runCmd = &cobra.Command{
 
 		r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			log.Info().Msgf("not-implemented %s %s", r.Method, r.URL)
-			w.WriteHeader(http.StatusNotFound)
 			//			vars := mux.Vars(r)
 			//			repoName := vars["repo-name"]
 		})

@@ -94,8 +94,6 @@ func (p *DockerProxyApp) HeadManifestHandler(w http.ResponseWriter, req *http.Re
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	//reference := vars["reference"]
-	//log.Print(reference, opt)
 	ctx := context.Background()
 	scope := fmt.Sprintf("repository:library/%s:pull", opt.namespace)
 	r, err := regclient.New(ctx, regclient.AuthConfig{
