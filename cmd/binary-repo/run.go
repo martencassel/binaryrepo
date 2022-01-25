@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 	dockerproxy "github.com/martencassel/binaryrepo/pkg/docker/proxy"
+	registry "github.com/martencassel/binaryrepo/pkg/docker/registry"
 	filestore "github.com/martencassel/binaryrepo/pkg/filestore/fs"
 	"github.com/martencassel/binaryrepo/pkg/repo"
 	version "github.com/martencassel/binaryrepo/pkg/util/version"
@@ -37,11 +38,22 @@ var runCmd = &cobra.Command{
 			Username: hubUser,
 			Password: hubPass,
 		})
+		repoIndex.AddRepo(repo.Repo{
+			ID:      2,
+			Name:    "docker-local",
+			Type:    repo.Local,
+			PkgType: repo.Docker,
+		})
 		r := mux.NewRouter()
 		//r.PathPrefix("/api").Subrouter()
 		dockerproxy.RegisterHandlers(r, fs, repoIndex)
+		registry.RegisterHandlers(r, fs, repoIndex)
+
 		r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			log.Printf("%s %s", r.Method, r.URL)
+			vars := mux.Vars(r)
+			repoName := vars["repo-name"]
+			log.Info().Msgf("Repo Name: %s", repoName)
 		})
 		/*
 			If the timeout are to low, DownloadLayer handler will failed with an error such as

@@ -144,3 +144,7 @@ func IsValidUUID(u string) bool {
 	_, err := uuid.Parse(u)
 	return err == nil
 }
+
+func (registry *DockerRegistry) DownloadLayer(w http.ResponseWriter, r *http.Request) {
+	log.Info().Msgf("DownloadLayer %s %s", r.Method, r.URL.Path)
+}
