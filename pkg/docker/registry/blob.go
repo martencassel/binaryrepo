@@ -148,3 +148,25 @@ func IsValidUUID(u string) bool {
 func (registry *DockerRegistry) DownloadLayer(w http.ResponseWriter, r *http.Request) {
 	////log.Info().Msgf("DownloadLayer %s %s", r.Method, r.URL.Path)
 }
+
+func (registry *DockerRegistry) InitiateBlobUpload(w http.ResponseWriter, r *http.Request) {
+	log.Info().Msgf("registry.InitiateBlobUpload %s %s", r.Method, r.URL.Path)
+	vars := mux.Vars(r)
+	repoName := vars["repo-name"]
+	uuid, _ := uuid.NewUUID()
+	loc := fmt.Sprintf("/v2/%s/blobs/uploads/%s", repoName, uuid)
+	w.Header().Set("Location", loc)
+	w.Header().Set("Range", "bytes=0-0")
+	w.Header().Set("Content-Length", "0")
+	w.Header().Set("Docker-Upload-UUID", uuid.String())
+	w.WriteHeader(http.StatusAccepted)
+}
+
+func (registry *DockerRegistry) UploadBlobChunk(w http.ResponseWriter, r *http.Request) {
+	log.Info().Msgf("registry.UploadBlobChunk %s %s", r.Method, r.URL.Path)
+	log.Info().Msg("registry.UploadBlobChunk Not implemented yet")
+	vars := mux.Vars(r)
+	repoName := vars["repo-name"]
+	uuid := vars["uuid"]
+	log.Info().Msgf("Repo-name: %s, uuid: %s\n", repoName, uuid)
+}

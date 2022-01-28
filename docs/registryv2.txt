@@ -1,0 +1,25 @@
+                    GET /v2/_catalog                        Retrieve sorted, json list of repositories
+GetVersion          GET /v2/                                Check that the endpoint implements Docker Registry v2
+GetManifest         GET /v2/<name>/manifests/<reference>    Fetch the manifest
+GetBlob             GET /v2/<name>/blobs/<digest>           Retrieve the blob from the registry
+GetUploadstatus     GET /v2/<name>/blobs/uploads/<uuid>     Retrieve status of upload identified by uuid
+ExistManifest       HEAD /v2/<name>/manifests/<reference>   Check existing manifest
+ExistLayer          HEAD /v2/<name>/blobs/<reference>       Check existing layer
+StartUpload         POST /v2/<name>/blobs/uploads           Initate a resumable upload.
+    1. Create upload directory
+    Create an empty file at /tmp/filestore/uploads/<uuid>
+    This file will store the upload data.
+    Chunked parts of the blob will be appended to this file.
+    After the upload is marked as completed, this file will be moved into the filestore.
+UploadChunk         PATCH /v2/<name>/blobs/uploads/<uuid>   Chunked upload
+UpdateManifest      PUT /v2/<name>/manifests/<reference>    Put the manifest identified by name and reference
+CompleteUpload      PUT /v2/<name>/blobs/uploads/<uuid>     Complete the upload specified by uuid
+    Move the file into the filestore
+    Then remove the upload file from the uploads folder
+MonolithicUpload    PUT /v2/<name>/blobs/uploads/<uuid>?digest=<digest     Monolithic Upload. Body = blob
+DeleteManifest      DELETE /v2/<name>/manifests/<reference> Delete the manifest
+DeleteBlob          DELETE /v2/<name>/blobs/<digest>        Delete the blob
+CancelUpload        DELETE /v2/<name>/blobs/uploads/<uuid>  Cancel outstanding upload processes
+                    Then remove the upload file from the uploads folder
+
+

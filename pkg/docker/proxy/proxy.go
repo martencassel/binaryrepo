@@ -38,3 +38,11 @@ func NewDockerProxyApp() *DockerProxyApp {
 	}
 	return &p
 }
+
+func NewProxyAppWithOptions(fs *filestore.FileStore, index *repo.RepoIndex) *DockerProxyApp {
+	p := DockerProxyApp{
+		fs:    fs,
+		index: index,
+	}
+	return &p
+}
