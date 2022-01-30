@@ -3,3 +3,5 @@ binaryrepo
 .vscode
 local.env
 binaryrepo.log
+*.xml
+*.html

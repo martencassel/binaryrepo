@@ -5,9 +5,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/gorilla/mux"
 	dockerproxy "github.com/martencassel/binaryrepo/pkg/docker/proxy"
-	registry "github.com/martencassel/binaryrepo/pkg/docker/registry"
+	dockerregistry "github.com/martencassel/binaryrepo/pkg/docker/registry"
+	dockerrouter "github.com/martencassel/binaryrepo/pkg/docker/router"
+
+	"github.com/gorilla/mux"
 	filestore "github.com/martencassel/binaryrepo/pkg/filestore/fs"
 	"github.com/martencassel/binaryrepo/pkg/repo"
 	version "github.com/martencassel/binaryrepo/pkg/util/version"
@@ -17,6 +19,13 @@ import (
 
 func init() {
 	rootCmd.AddCommand(runCmd)
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Info().Msgf("loggingMiddleware: %s", r.RequestURI)
+		next.ServeHTTP(w, r)
+	})
 }
 
 var runCmd = &cobra.Command{
@@ -45,10 +54,12 @@ var runCmd = &cobra.Command{
 			PkgType: repo.Docker,
 		})
 		r := mux.NewRouter()
-		//r.PathPrefix("/api").Subrouter()
-		dockerproxy.RegisterHandlers(r, fs, repoIndex)
-		registry.RegisterHandlers(r, fs, repoIndex)
+		dockerProxy := dockerproxy.NewProxyAppWithOptions(fs, repoIndex)
+		dockerRegistry := dockerregistry.NewDockerRegistry(fs, repoIndex)
 
+		dockerRouter := dockerrouter.NewDockerRouter(dockerProxy, dockerRegistry, repoIndex)
+		dockerRouter.RegisterHandlers(r)
+		r.Use(loggingMiddleware)
 		r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			log.Info().Msgf("not-implemented %s %s", r.Method, r.URL)
 			//			vars := mux.Vars(r)
