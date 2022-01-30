@@ -61,7 +61,7 @@ func TestManifest(t *testing.T) {
 		assert.Equal(t, "close", res.Header().Get("Connection"))
 	})
 	// DELETE /v2/<name>/manifests/<reference>
-	t.Run("Delete a manifest", func(t *testing.T) {
+	t.Run("Deleting an manifest", func(t *testing.T) {
 		// Arrange
 		// Act
 		// Assert

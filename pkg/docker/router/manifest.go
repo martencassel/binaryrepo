@@ -12,20 +12,20 @@ import (
 	Check for a manifest
 	HEAD /v2/<name>/manifests/<digest>
 */
-func (router *DockerRouter) HeadManifestHandler(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("dockerreouter.HeadManifest %s %s\n", r.Method, r.URL.Path)
-	vars := mux.Vars(r)
+func (router *DockerRouter) HasManifest(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("dockerreouter.HeadManifest %s %s", req.Method, req.URL.Path)
+	vars := mux.Vars(req)
 	repoName := vars["repo-name"]
 	_repo := router.index.FindRepo(repoName)
 	if _repo == nil {
-		w.WriteHeader(http.StatusNotFound)
+		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 	if _repo.Type == repo.Remote && _repo.PkgType == repo.Docker {
-		router.proxy.HeadManifestHandler(w, r)
+		router.proxy.HasManifest(rw, req)
 	}
 	if _repo.Type == repo.Local && _repo.PkgType == repo.Docker {
-		router.registry.HeadManifestHandler(w, r)
+		router.registry.HasManifest(rw, req)
 	}
 }
 
@@ -33,19 +33,19 @@ func (router *DockerRouter) HeadManifestHandler(w http.ResponseWriter, r *http.R
 	Get a manifest
 	GET /v2/<name>/manifests/<digest>
 */
-func (router *DockerRouter) GetManifestHandler(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("dockerrouter.GetManifest %s %s\n", r.Method, r.URL.Path)
-	vars := mux.Vars(r)
+func (router *DockerRouter) GetManifestHandler(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("dockerrouter.GetManifest %s %s", req.Method, req.URL.Path)
+	vars := mux.Vars(req)
 	repoName := vars["repo-name"]
 	_repo := router.index.FindRepo(repoName)
 	if _repo == nil {
-		w.WriteHeader(http.StatusNotFound)
+		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 	if _repo.Type == repo.Remote && _repo.PkgType == repo.Docker {
-		router.proxy.GetManifestHandler(w, r)
+		router.proxy.GetManifestHandler(rw, req)
 	}
 	if _repo.Type == repo.Local && _repo.PkgType == repo.Docker {
-		router.registry.GetManifestHandler(w, r)
+		router.registry.GetManifestHandler(rw, req)
 	}
 }

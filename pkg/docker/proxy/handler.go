@@ -14,8 +14,8 @@ func RegisterHandlers(r *mux.Router, fs *filestore.FileStore, repoIndex *repo.Re
 	p.index = repoIndex
 	r.HandleFunc(PathVersionUrl1, p.VersionHandler).Methods(http.MethodGet)
 	r.HandleFunc(PathVersionUrl2, p.VersionHandler).Methods(http.MethodGet)
-	r.HandleFunc(PathHeadManifest1, p.HeadManifestHandler).Methods(http.MethodHead)
-	r.HandleFunc(PathHeadManifest2, p.HeadManifestHandler).Methods(http.MethodHead)
+	r.HandleFunc(PathHeadManifest1, p.HasManifest).Methods(http.MethodHead)
+	r.HandleFunc(PathHeadManifest2, p.HasManifest).Methods(http.MethodHead)
 	r.HandleFunc(PathGetManifest1, p.GetManifestHandler).Methods(http.MethodGet)
 	r.HandleFunc(PathGetManifest2, p.GetManifestHandler).Methods(http.MethodGet)
 	r.HandleFunc(PathGetBlob1, p.DownloadLayer).Methods(http.MethodGet)

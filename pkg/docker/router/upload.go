@@ -12,22 +12,22 @@ import (
 	Start an upload
 	POST /v2/<name>/blobs/uploads
 */
-func (router *DockerRouter) StartUpload(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("dockerrouter.StartUpload %s %s", r.Method, r.URL.Path)
-	vars := mux.Vars(r)
+func (router *DockerRouter) StartUpload(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("dockerrouter.StartUpload %s %s", req.Method, req.URL.Path)
+	vars := mux.Vars(req)
 	repoName := vars["repo-name"]
-	urlParams := r.URL.Query()
+	urlParams := req.URL.Query()
 	mountSha := urlParams.Get("mount")
 	log.Info().Msgf("Repo-name: %s, mountSha: %s", repoName, mountSha)
 	_repo := router.index.FindRepo(repoName)
 	if _repo == nil {
-		w.WriteHeader(http.StatusNotFound)
+		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 	if _repo.Type == repo.Local && _repo.PkgType == repo.Docker {
-		router.registry.StartUpload(w, r)
+		router.registry.StartUpload(rw, req)
 	} else {
-		w.WriteHeader(http.StatusNotFound)
+		rw.WriteHeader(http.StatusNotFound)
 	}
 }
 
@@ -35,8 +35,8 @@ func (router *DockerRouter) StartUpload(w http.ResponseWriter, r *http.Request) 
 	Upload progress
 	GET /v2/<name>/blobs/uploads/<uuid>
 */
-func (router *DockerRouter) UploadProgress(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("dockerrouter.UploadProgress %s %s", r.Method, r.URL.Path)
+func (router *DockerRouter) UploadProgress(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("dockerrouter.UploadProgress %s %s", req.Method, req.URL.Path)
 	log.Info().Msg("no implemented")
 }
 
@@ -44,8 +44,8 @@ func (router *DockerRouter) UploadProgress(w http.ResponseWriter, r *http.Reques
 	Monolithic upload
 	PUT /v2/<name>/blobs/uploads/<uuid>?digest=<digest>
 */
-func (router *DockerRouter) MonolithicUpload(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("dockerrouter.MonolithicUpload %s %s", r.Method, r.URL.Path)
+func (router *DockerRouter) MonolithicUpload(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("dockerrouter.MonolithicUpload %s %s", req.Method, req.URL.Path)
 	log.Info().Msg("no implemented")
 }
 
@@ -67,7 +67,7 @@ func (router *DockerRouter) MonolithicUpload(w http.ResponseWriter, r *http.Requ
 	Upload a chunk of data for the specified found
 	PATCH /v2/<name>/blobs/<uuid>
 */
-func (router *DockerRouter) UploadChunk(w http.ResponseWriter, r *http.Request) {
+func (router *DockerRouter) UploadChunk(rw http.ResponseWriter, r *http.Request) {
 	log.Info().Msgf("dockerrouter.UploadChunk %s %s", r.Method, r.URL.Path)
 	log.Info().Msg("no implemented")
 }
@@ -76,8 +76,8 @@ func (router *DockerRouter) UploadChunk(w http.ResponseWriter, r *http.Request) 
 	Completed upload
 	PUT /v2/<name>/blobs/uploads/<uuid>?digest=<digest>
 */
-func (registry *DockerRouter) CompleteUpload(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("dockerrouter.CompleteUpload %s %s", r.Method, r.URL.Path)
+func (registry *DockerRouter) CompleteUpload(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("dockerrouter.CompleteUpload %s %s", req.Method, req.URL.Path)
 	log.Info().Msg("no implemented")
 }
 
@@ -85,7 +85,7 @@ func (registry *DockerRouter) CompleteUpload(w http.ResponseWriter, r *http.Requ
 	Cancel upload
 	DELETE /v2/<name>/blobs/uploads/<uuid>
 */
-func (registry *DockerRouter) CancelUpload(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("dockerrouter.CancelUpload %s %s", r.Method, r.URL.Path)
+func (registry *DockerRouter) CancelUpload(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("dockerrouter.CancelUpload %s %s", req.Method, req.URL.Path)
 	log.Info().Msg("no implemented")
 }

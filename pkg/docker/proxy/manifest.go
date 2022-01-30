@@ -21,48 +21,48 @@ const PathGetManifest2 = "/repo/{repo-name}/v2/{namespace}/{namespace2}/manifest
 	Check for a manifest
 	GET /v2/<name>/manifests/<digest>
 */
-func (p *DockerProxyApp) GetManifestHandler(w http.ResponseWriter, req *http.Request) {
+func (p *DockerProxyApp) GetManifestHandler(rw http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("proxy.getmanifest %s %s", req.Method, req.URL.Path)
 	opt := GetOptions(req)
 	_repo := p.index.FindRepo(opt.repoName)
 	if _repo == nil {
-		w.WriteHeader(http.StatusNotFound)
+		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 	if _repo.Username == "" || _repo.Password == "" {
 		log.Error().Msgf("Repo %s is not authorized. Add username/password in cmd/binary-repo/run.go", opt.repoName)
-		w.WriteHeader(http.StatusUnauthorized)
+		rw.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	ctx := context.Background()
 	scope := fmt.Sprintf("repository:library/%s:pull", opt.namespace)
 	r, err := p.NewRegistryClient("docker.io", _repo.Username, _repo.Password, scope, _repo.URL)
 	if err != nil {
-		log.Error().Msgf("Error creating registry client: %s\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		log.Error().Msgf("Error creating registry client: %s", err)
+		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	if err != nil {
-		log.Error().Msgf("Error creating registry client: %s\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		log.Error().Msgf("Error creating registry client: %s", err)
+		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	path := fmt.Sprintf("library/%s", opt.namespace)
 	_, resp, err := r.Digest(ctx, regclient.Image{Domain: "docker.io", Path: path, Tag: opt.reference})
 	if err != nil {
 		log.Error().Msgf("Error getting digest: %s", err)
-		w.WriteHeader(http.StatusNotFound)
+		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
-	copyResponse(w, resp)
+	copyResponse(rw, resp)
 }
 
-func copyResponse(w http.ResponseWriter, resp *http.Response) {
-	copyHeader(w.Header(), resp.Header)
-	w.WriteHeader(resp.StatusCode)
-	_, err := io.Copy(w, resp.Body)
+func copyResponse(rw http.ResponseWriter, resp *http.Response) {
+	copyHeader(rw.Header(), resp.Header)
+	rw.WriteHeader(resp.StatusCode)
+	_, err := io.Copy(rw, resp.Body)
 	if err != nil {
-		log.Error().Msgf("Error copying response: %s\n", err)
+		log.Error().Msgf("Error copying response: %s", err)
 	}
 }
 
@@ -82,7 +82,7 @@ const PathHeadManifest2 = "/repo/{repo-name}/v2/{namespace1}/{namespace2}/manife
 	Check for a manifest
 	HEAD /v2/<name>/manifests/<digest>
 */
-func (p *DockerProxyApp) HeadManifestHandler(w http.ResponseWriter, req *http.Request) {
+func (p *DockerProxyApp) HasManifest(rw http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("proxy.head_manifest %s %s", req.Method, req.URL.Path)
 	opt := GetOptions(req)
 	var _repo *repo.Repo
@@ -91,12 +91,12 @@ func (p *DockerProxyApp) HeadManifestHandler(w http.ResponseWriter, req *http.Re
 	_repo = p.index.FindRepo(repoName)
 	if _repo == nil {
 		log.Error().Msgf("Repo %s was not found", repoName)
-		w.WriteHeader(http.StatusNotFound)
+		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 	if _repo.Username == "" || _repo.Password == "" {
 		log.Error().Msgf("Repo %s is not authorized", opt.repoName)
-		w.WriteHeader(http.StatusUnauthorized)
+		rw.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	ctx := context.Background()
@@ -114,16 +114,16 @@ func (p *DockerProxyApp) HeadManifestHandler(w http.ResponseWriter, req *http.Re
 		Insecure: false,
 	})
 	if err != nil {
-		log.Error().Msgf("Error creating registry client: %s\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		log.Error().Msgf("Error creating registry client: %s", err)
+		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	path := fmt.Sprintf("library/%s", opt.namespace)
 	_, resp, err := r.Digest(ctx, regclient.Image{Domain: "docker.io", Path: path, Tag: opt.reference})
 	if err != nil {
 		log.Error().Msgf("Error getting digest: %s", err)
-		w.WriteHeader(http.StatusNotFound)
+		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
-	copyResponse(w, resp)
+	copyResponse(rw, resp)
 }

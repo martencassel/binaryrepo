@@ -18,39 +18,39 @@ const PathInitBlobUpload = "/repo/{repo-name}/v2/{name}/blobs/upload"
 // PathExistsBlob URL.
 const PathExistsBlob = "/repo/{repo-name}/v2/{name}/blobs/{uuid}"
 
-func (registry *DockerRegistry) ExistsBlob(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("registry.ExistsBlob %s %s", r.Method, r.URL.Path)
-	vars := mux.Vars(r)
+func (registry *DockerRegistry) ExistsBlob(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("registry.ExistsBlob %s %s", req.Method, req.URL.Path)
+	vars := mux.Vars(req)
 	name := vars["name"]
 	repoName := vars["repo-name"]
 	d := vars["digest"]
-	if r.Method != http.MethodHead {
-		w.WriteHeader(http.StatusMethodNotAllowed)
+	if req.Method != http.MethodHead {
+		rw.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 	if registry.index.FindRepo(repoName) == nil || name == "" || d == "" {
-		w.WriteHeader(http.StatusNotFound)
+		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 	digest, err := digest.Parse(d)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		rw.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	if !registry.fs.Exists(digest) {
-		w.WriteHeader(http.StatusNotFound)
+		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 	b, err := registry.fs.ReadFile(digest)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("docker-distribution-api-version", "registry/2.0")
-	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(b)))
-	w.Header().Set("Content-Type", "application/octet-stream")
-	w.Header().Set("connection", "close")
-	w.WriteHeader(http.StatusAccepted)
+	rw.Header().Set("docker-distribution-api-version", "registry/2.0")
+	rw.Header().Set("Content-Length", fmt.Sprintf("%d", len(b)))
+	rw.Header().Set("Content-Type", "application/octet-stream")
+	rw.Header().Set("connection", "close")
+	rw.WriteHeader(http.StatusAccepted)
 }
 
 func fileExists(path string) bool {
@@ -67,8 +67,8 @@ func IsValidUUID(u string) bool {
 	return err == nil
 }
 
-func (registry *DockerRegistry) DownloadLayer(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("registry.DownloadLayer %s %s", r.Method, r.URL.Path)
+func (registry *DockerRegistry) DownloadLayer(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("registry.DownloadLayer %s %s", req.Method, req.URL.Path)
 	log.Info().Msg("Not implemented")
 }
 
@@ -76,6 +76,6 @@ func (registry *DockerRegistry) DownloadLayer(w http.ResponseWriter, r *http.Req
 	Deleting a Layer
 	DELETE /v2/<name>/blobs/<digest>
 */
-func (registry *DockerRegistry) DeleteLayer(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("registry.DeleteLayer %s %s", r.Method, r.URL.Path)
+func (registry *DockerRegistry) DeleteLayer(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("registry.DeleteLayer %s %s", req.Method, req.URL.Path)
 }

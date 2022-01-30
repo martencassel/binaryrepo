@@ -56,8 +56,8 @@ func (router *DockerRouter) RegisterHandlers(r *mux.Router) {
 	// HEAD /v2/<name>/manifests/<reference>
 	// GET /v2/<name>/manifests/<reference>
 	// GET /v2/<name>/blobs/<digest>
-	r.HandleFunc(dockerproxy.PathHeadManifest1, router.HeadManifestHandler).Methods(http.MethodHead)
-	r.HandleFunc(dockerproxy.PathGetManifest2, router.HeadManifestHandler).Methods(http.MethodHead)
+	r.HandleFunc(dockerproxy.PathHeadManifest1, router.HasManifest).Methods(http.MethodHead)
+	r.HandleFunc(dockerproxy.PathGetManifest2, router.HasManifest).Methods(http.MethodHead)
 	r.HandleFunc(PathGetManifest1, router.GetManifestHandler).Methods(http.MethodGet)
 	r.HandleFunc(PathGetManifest2, router.GetManifestHandler).Methods(http.MethodGet)
 	r.HandleFunc(PathGetBlob1, router.DownloadLayer).Methods(http.MethodGet)

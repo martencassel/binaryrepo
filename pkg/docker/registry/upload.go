@@ -14,9 +14,9 @@ import (
 	Start an upload
 	POST /v2/<name>/blobs/uploads
 */
-func (registry *DockerRegistry) StartUpload(rw http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("registry.StartUpload %s %s", r.Method, r.URL.Path)
-	vars := mux.Vars(r)
+func (registry *DockerRegistry) StartUpload(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("registry.StartUpload %s %s", req.Method, req.URL.Path)
+	vars := mux.Vars(req)
 	name := vars["name"]
 	repoName := vars["repo-name"]
 	if registry.index.FindRepo(repoName) == nil || name == "" {
@@ -44,8 +44,8 @@ func (registry *DockerRegistry) StartUpload(rw http.ResponseWriter, r *http.Requ
 	Upload progress
 	GET /v2/<name>/blobs/uploads/<uuid>
 */
-func (registry *DockerRegistry) UploadProgress(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("registry.UploadProgress %s %s", r.Method, r.URL.Path)
+func (registry *DockerRegistry) UploadProgress(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("registry.UploadProgress %s %s", req.Method, req.URL.Path)
 	log.Info().Msg("no implemented")
 }
 
@@ -53,8 +53,8 @@ func (registry *DockerRegistry) UploadProgress(w http.ResponseWriter, r *http.Re
 	Monolithic upload
 	PUT /v2/<name>/blobs/uploads/<uuid>?digest=<digest>
 */
-func (registry *DockerRegistry) MonolithicUpload(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("registry.MonolithicUpload %s %s", r.Method, r.URL.Path)
+func (registry *DockerRegistry) MonolithicUpload(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("registry.MonolithicUpload %s %s", req.Method, req.URL.Path)
 	log.Info().Msg("no implemented")
 }
 
@@ -62,60 +62,60 @@ func (registry *DockerRegistry) MonolithicUpload(w http.ResponseWriter, r *http.
 	Chunked upload
 	PATCH /v2/<name>/blobs/uploads/<uuid>
 */
-func (registry *DockerRegistry) UploadChunk(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("registry.UploadChunk %s %s", r.Method, r.URL.Path)
-	vars := mux.Vars(r)
+func (registry *DockerRegistry) UploadChunk(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("registry.UploadChunk %s %s", req.Method, req.URL.Path)
+	vars := mux.Vars(req)
 	name := vars["name"]
 	repoName := vars["repo-name"]
 	uuid := vars["uuid"]
-	log.Printf("%s /repo/%s/v2/%s/blobs/uploads/%s", r.Method, repoName, name, uuid)
-	if r.Method != http.MethodPut {
-		w.WriteHeader(http.StatusMethodNotAllowed)
+	log.Printf("%s /repo/%s/v2/%s/blobs/uploads/%s", req.Method, repoName, name, uuid)
+	if req.Method != http.MethodPut {
+		rw.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 	if registry.index.FindRepo(repoName) == nil || name == "" || uuid == "" {
-		w.WriteHeader(http.StatusNotFound)
+		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
-	if r.Body == http.NoBody || r.ContentLength == 0 {
-		w.WriteHeader(http.StatusBadRequest)
+	if req.Body == http.NoBody || req.ContentLength == 0 {
+		rw.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	if !IsValidUUID(uuid) {
-		w.WriteHeader(http.StatusBadRequest)
+		rw.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if r.Header.Get("Range") != "" {
-		w.WriteHeader(http.StatusNotImplemented)
+	if req.Header.Get("Range") != "" {
+		rw.WriteHeader(http.StatusNotImplemented)
 		return
 	}
 	uploadPath := fmt.Sprintf("%s/uploads/%s", registry.fs.BasePath, uuid)
 	if !fileExists(uploadPath) {
-		w.WriteHeader(http.StatusNotFound)
+		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 	location := fmt.Sprintf("/repo/%s/v2/%s/blobs/uploads/%s", repoName, name, uuid)
 	offset := len(body) - 1
-	w.Header().Set("Content-Length", "0")
-	w.Header().Set("docker-distribution-api-version", "registry/2.0")
-	w.Header().Set("Docker-Upload-UUID", uuid)
-	w.Header().Set("Location", location)
-	w.Header().Set("Range", fmt.Sprintf("0-%d", offset))
-	w.Header().Set("connection", "close")
-	w.WriteHeader(http.StatusAccepted)
+	rw.Header().Set("Content-Length", "0")
+	rw.Header().Set("docker-distribution-api-version", "registry/2.0")
+	rw.Header().Set("Docker-Upload-UUID", uuid)
+	rw.Header().Set("Location", location)
+	rw.Header().Set("Range", fmt.Sprintf("0-%d", offset))
+	rw.Header().Set("connection", "close")
+	rw.WriteHeader(http.StatusAccepted)
 }
 
 /*
 	Completed upload
 	PUT /v2/<name>/blobs/uploads/<uuid>?digest=<digest>
 */
-func (registry *DockerRegistry) CompleteUpload(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("registry.CompleteUpload %s %s", r.Method, r.URL.Path)
+func (registry *DockerRegistry) CompleteUpload(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("registry.CompleteUpload %s %s", req.Method, req.URL.Path)
 	log.Info().Msg("no implemented")
 }
 
@@ -123,7 +123,7 @@ func (registry *DockerRegistry) CompleteUpload(w http.ResponseWriter, r *http.Re
 	Cancel upload
 	DELETE /v2/<name>/blobs/uploads/<uuid>
 */
-func (registry *DockerRegistry) CancelUpload(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("registry.CancelUpload %s %s", r.Method, r.URL.Path)
+func (registry *DockerRegistry) CancelUpload(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("registry.CancelUpload %s %s", req.Method, req.URL.Path)
 	log.Info().Msg("no implemented")
 }

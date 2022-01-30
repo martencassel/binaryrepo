@@ -93,7 +93,7 @@ func TestManifestExists(t *testing.T) {
 			"reference":  "latest",
 		}
 		req = mux.SetURLVars(req, vars)
-		p.HeadManifestHandler(rec, req)
+		p.HasManifest(rec, req)
 		res := rec.Result()
 		if res.StatusCode != http.StatusOK {
 			t.Errorf("Status code is not OK: %d", res.StatusCode)
