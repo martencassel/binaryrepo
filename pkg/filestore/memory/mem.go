@@ -2,6 +2,7 @@ package memory
 
 import (
 	"bytes"
+	"errors"
 
 	_ "crypto/sha256"
 
@@ -21,11 +22,11 @@ func NewFileStore(basePath string) *FileStore {
 	return fs
 }
 
-func (fs *FileStore) ReadFile(b []byte) (digest.Digest, error) {
-	if ok := fs.fileMap[digest.FromBytes(b)]; ok != nil {
-		return digest.FromBytes(b), nil
+func (fs *FileStore) ReadFile(digest digest.Digest) ([]byte, error) {
+	if ok := fs.fileMap[digest]; ok != nil {
+		return []byte(digest.Hex()), nil
 	}
-	return "", nil
+	return nil, errors.New("file not found")
 }
 
 func (fs *FileStore) WriteFile(b []byte) (digest.Digest, error) {

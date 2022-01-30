@@ -38,7 +38,6 @@ func TestBlob(t *testing.T) {
 		req, _ := http.NewRequest(http.MethodHead, "", nil)
 		req = mux.SetURLVars(req, vars)
 		registry.ExistsBlob(res, req)
-
 		// Assert
 		assert.Equal(t, http.StatusNotFound, res.Code)
 		assert.Contains(t, "registry/2.0", res.Header().Get("docker-distribution-api-version"))

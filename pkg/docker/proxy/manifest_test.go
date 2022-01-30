@@ -55,11 +55,12 @@ func TestGetManifest(t *testing.T) {
 		if res.StatusCode != http.StatusOK {
 			t.Errorf("Status code is not OK: %d", res.StatusCode)
 		}
+
 		assert.Equal(t, "1573", res.Header.Get("Content-Length"))
 		assert.Equal(t, "application/vnd.docker.distribution.manifest.v2+json", res.Header.Get("Content-Type"))
-		assert.Equal(t, "sha256:563888f63149e3959860264a1202ef9a644f44ed6c24d5c7392f9e2262bd3553", res.Header.Get("docker-content-digest"))
+		assert.Equal(t, "sha256:03f00cd789243846888e2f834c762f53b224b9970b434a192b0f6b533d7e219c", res.Header.Get("docker-content-digest"))
 		assert.Equal(t, "registry/2.0", res.Header.Get("Docker-Distribution-Api-Version"))
-		assert.Equal(t, "\"sha256:563888f63149e3959860264a1202ef9a644f44ed6c24d5c7392f9e2262bd3553\"", res.Header.Get("Etag"))
+		assert.Equal(t, "\"sha256:03f00cd789243846888e2f834c762f53b224b9970b434a192b0f6b533d7e219c\"", res.Header.Get("Etag"))
 	})
 
 }
@@ -99,9 +100,9 @@ func TestManifestExists(t *testing.T) {
 			t.Errorf("Status code is not OK: %d", res.StatusCode)
 		}
 		assert.Equal(t, "application/vnd.docker.distribution.manifest.v2+json", res.Header.Get("Content-Type"))
-		assert.Equal(t, "sha256:563888f63149e3959860264a1202ef9a644f44ed6c24d5c7392f9e2262bd3553", res.Header.Get("docker-content-digest"))
+		assert.Equal(t, "sha256:03f00cd789243846888e2f834c762f53b224b9970b434a192b0f6b533d7e219c", res.Header.Get("docker-content-digest"))
 		assert.Equal(t, "registry/2.0", res.Header.Get("Docker-Distribution-Api-Version"))
-		assert.Equal(t, "\"sha256:563888f63149e3959860264a1202ef9a644f44ed6c24d5c7392f9e2262bd3553\"", res.Header.Get("Etag"))
+		assert.Equal(t, "\"sha256:03f00cd789243846888e2f834c762f53b224b9970b434a192b0f6b533d7e219c\"", res.Header.Get("Etag"))
 	})
 
 	t.Run("Test 3", func(t *testing.T) {
