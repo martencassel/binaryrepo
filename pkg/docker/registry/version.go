@@ -16,7 +16,6 @@ func (registry *DockerRegistry) VersionHandler(w http.ResponseWriter, r *http.Re
 	vars := mux.Vars(r)
 	repoName := vars["repo-name"]
 	repo := registry.index.FindRepo(repoName)
-	//////log.Info().Msgf("%v", r)
 	if repo == nil {
 		log.Printf("Repo %s was not found", repoName)
 		w.WriteHeader(http.StatusNotFound)

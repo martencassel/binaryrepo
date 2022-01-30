@@ -8,6 +8,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+/*
+	Check for a manifest
+	HEAD /v2/<name>/manifests/<digest>
+*/
 func (router *DockerRouter) HeadManifestHandler(w http.ResponseWriter, r *http.Request) {
 	log.Info().Msgf("dockerreouter.HeadManifest %s %s\n", r.Method, r.URL.Path)
 	vars := mux.Vars(r)
@@ -25,6 +29,10 @@ func (router *DockerRouter) HeadManifestHandler(w http.ResponseWriter, r *http.R
 	}
 }
 
+/*
+	Get a manifest
+	GET /v2/<name>/manifests/<digest>
+*/
 func (router *DockerRouter) GetManifestHandler(w http.ResponseWriter, r *http.Request) {
 	log.Info().Msgf("dockerrouter.GetManifest %s %s\n", r.Method, r.URL.Path)
 	vars := mux.Vars(r)

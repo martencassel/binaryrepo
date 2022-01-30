@@ -74,7 +74,7 @@ func TestBlob(t *testing.T) {
 			"name":      "redis",
 		}
 		req = mux.SetURLVars(req, vars)
-		registry.InitBlobUpload(res, req)
+		registry.StartUpload(res, req)
 
 		// Assert
 		assert.Contains(t, res.Header().Get("Content-Length"), "0")

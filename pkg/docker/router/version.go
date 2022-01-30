@@ -8,10 +8,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const PathVersionUrl1 = "/repo/{repo-name}/v2"
-const PathVersionUrl2 = "/repo/{repo-name}/v2/"
+const VerionHandlerPath1 = "/repo/{repo-name}/v2"
+const VerionHandlerPath2 = "/repo/{repo-name}/v2/"
 
-func (router *DockerRouter) versionHandler(w http.ResponseWriter, r *http.Request) {
+func (router *DockerRouter) VersionHandler(w http.ResponseWriter, r *http.Request) {
 	log.Info().Msgf("dockerrouter.versionHandler %s %s\n", r.Method, r.URL.Path)
 	vars := mux.Vars(r)
 	repoName := vars["repo-name"]

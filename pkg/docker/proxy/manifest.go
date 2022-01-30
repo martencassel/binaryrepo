@@ -17,10 +17,13 @@ import (
 const PathGetManifest1 = "/repo/{repo-name}/v2/{namespace}/manifests/{reference}"
 const PathGetManifest2 = "/repo/{repo-name}/v2/{namespace}/{namespace2}/manifests/{reference}"
 
+/*
+	Check for a manifest
+	GET /v2/<name>/manifests/<digest>
+*/
 func (p *DockerProxyApp) GetManifestHandler(w http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("proxy.getmanifest %s %s", req.Method, req.URL.Path)
 	opt := GetOptions(req)
-	////log.Info().Msgf("%s %s\n", req.Method, req.URL.Path)
 	_repo := p.index.FindRepo(opt.repoName)
 	if _repo == nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -46,8 +49,6 @@ func (p *DockerProxyApp) GetManifestHandler(w http.ResponseWriter, req *http.Req
 	}
 	path := fmt.Sprintf("library/%s", opt.namespace)
 	_, resp, err := r.Digest(ctx, regclient.Image{Domain: "docker.io", Path: path, Tag: opt.reference})
-	//////log.Info().Msgf("Digest: %s", d.String())
-	//////log.Info().Msgf("%v", resp)
 	if err != nil {
 		log.Error().Msgf("Error getting digest: %s", err)
 		w.WriteHeader(http.StatusNotFound)
@@ -77,6 +78,10 @@ func copyHeader(dst, src http.Header) {
 const PathHeadManifest1 = "/repo/{repo-name}/v2/{namespace}/manifests/{reference}"
 const PathHeadManifest2 = "/repo/{repo-name}/v2/{namespace1}/{namespace2}/manifests/{reference}"
 
+/*
+	Check for a manifest
+	HEAD /v2/<name>/manifests/<digest>
+*/
 func (p *DockerProxyApp) HeadManifestHandler(w http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("proxy.head_manifest %s %s", req.Method, req.URL.Path)
 	opt := GetOptions(req)
@@ -115,8 +120,6 @@ func (p *DockerProxyApp) HeadManifestHandler(w http.ResponseWriter, req *http.Re
 	}
 	path := fmt.Sprintf("library/%s", opt.namespace)
 	_, resp, err := r.Digest(ctx, regclient.Image{Domain: "docker.io", Path: path, Tag: opt.reference})
-	//////log.Info().Msgf("Digest: %s", d.String())
-	//////log.Info().Msgf("%v", resp)
 	if err != nil {
 		log.Error().Msgf("Error getting digest: %s", err)
 		w.WriteHeader(http.StatusNotFound)

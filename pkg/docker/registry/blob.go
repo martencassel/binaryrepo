@@ -3,7 +3,6 @@ package registry
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -16,88 +15,11 @@ import (
 // PathInitBlobUpload URL.
 const PathInitBlobUpload = "/repo/{repo-name}/v2/{name}/blobs/upload"
 
-// Initiate a resumable blob upload.
-func (registry *DockerRegistry) InitBlobUpload(rw http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	name := vars["name"]
-	repoName := vars["repo-name"]
-	if registry.index.FindRepo(repoName) == nil || name == "" {
-		rw.WriteHeader(http.StatusNotFound)
-		return
-	}
-	////log.Info().Msgf("%s /v2/%s/blobs/uploads", http.MethodPost, name)
-	uuid, _ := uuid.NewUUID()
-	err := ioutil.WriteFile(fmt.Sprintf("%s/uploads/%s", registry.fs.BasePath, uuid.String()), []byte{}, 0644)
-	if err != nil {
-		log.Error().Msg(err.Error())
-		rw.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	loc := fmt.Sprintf("/repo/%s/v2/%s/blobs/uploads/%s", repoName, name, uuid)
-	rw.Header().Set("Content-Length", "0")
-	rw.Header().Set("docker-distribution-api-version", "registry/2.0")
-	rw.Header().Set("Docker-Upload-UUID", uuid.String())
-	rw.Header().Set("Range", "0-0")
-	rw.Header().Set("Location", loc)
-	rw.Header().Set("Connection", "close")
-	rw.WriteHeader(http.StatusAccepted)
-}
-
-// PathChunkedUpload URL.
-const PathChunkedUpload = "/repo/{repo-name}/v2/{name}/blobs/uploads/{uuid}"
-
-// Upload a chunk of data for the specified upload.
-func (registry *DockerRegistry) UploadChunk(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	name := vars["name"]
-	repoName := vars["repo-name"]
-	uuid := vars["uuid"]
-	log.Printf("%s /repo/%s/v2/%s/blobs/uploads/%s", r.Method, repoName, name, uuid)
-	if r.Method != http.MethodPut {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-	if registry.index.FindRepo(repoName) == nil || name == "" || uuid == "" {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-	if r.Body == http.NoBody || r.ContentLength == 0 {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	if !IsValidUUID(uuid) {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	if r.Header.Get("Range") != "" {
-		w.WriteHeader(http.StatusNotImplemented)
-		return
-	}
-	uploadPath := fmt.Sprintf("%s/uploads/%s", registry.fs.BasePath, uuid)
-	if !fileExists(uploadPath) {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-	location := fmt.Sprintf("/repo/%s/v2/%s/blobs/uploads/%s", repoName, name, uuid)
-	offset := len(body) - 1
-	w.Header().Set("Content-Length", "0")
-	w.Header().Set("docker-distribution-api-version", "registry/2.0")
-	w.Header().Set("Docker-Upload-UUID", uuid)
-	w.Header().Set("Location", location)
-	w.Header().Set("Range", fmt.Sprintf("0-%d", offset))
-	w.Header().Set("connection", "close")
-	w.WriteHeader(http.StatusAccepted)
-}
-
 // PathExistsBlob URL.
 const PathExistsBlob = "/repo/{repo-name}/v2/{name}/blobs/{uuid}"
 
 func (registry *DockerRegistry) ExistsBlob(w http.ResponseWriter, r *http.Request) {
+	log.Info().Msgf("registry.ExistsBlob %s %s", r.Method, r.URL.Path)
 	vars := mux.Vars(r)
 	name := vars["name"]
 	repoName := vars["repo-name"]
@@ -146,27 +68,14 @@ func IsValidUUID(u string) bool {
 }
 
 func (registry *DockerRegistry) DownloadLayer(w http.ResponseWriter, r *http.Request) {
-	////log.Info().Msgf("DownloadLayer %s %s", r.Method, r.URL.Path)
+	log.Info().Msgf("registry.DownloadLayer %s %s", r.Method, r.URL.Path)
+	log.Info().Msg("Not implemented")
 }
 
-func (registry *DockerRegistry) InitiateBlobUpload(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("registry.InitiateBlobUpload %s %s", r.Method, r.URL.Path)
-	vars := mux.Vars(r)
-	repoName := vars["repo-name"]
-	uuid, _ := uuid.NewUUID()
-	loc := fmt.Sprintf("/v2/%s/blobs/uploads/%s", repoName, uuid)
-	w.Header().Set("Location", loc)
-	w.Header().Set("Range", "bytes=0-0")
-	w.Header().Set("Content-Length", "0")
-	w.Header().Set("Docker-Upload-UUID", uuid.String())
-	w.WriteHeader(http.StatusAccepted)
-}
-
-func (registry *DockerRegistry) UploadBlobChunk(w http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("registry.UploadBlobChunk %s %s", r.Method, r.URL.Path)
-	log.Info().Msg("registry.UploadBlobChunk Not implemented yet")
-	vars := mux.Vars(r)
-	repoName := vars["repo-name"]
-	uuid := vars["uuid"]
-	log.Info().Msgf("Repo-name: %s, uuid: %s\n", repoName, uuid)
+/*
+	Deleting a Layer
+	DELETE /v2/<name>/blobs/<digest>
+*/
+func (registry *DockerRegistry) DeleteLayer(w http.ResponseWriter, r *http.Request) {
+	log.Info().Msgf("registry.DeleteLayer %s %s", r.Method, r.URL.Path)
 }
