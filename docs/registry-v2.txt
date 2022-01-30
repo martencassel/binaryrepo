@@ -12,7 +12,6 @@ HEAD /v2/<name>/manifests/<reference>
 * Pulling a Layer
 GET /v2/<name>/blobs/<digest>
 
-
 * Pushing images
 
 The client first pushes individual layers, then it will upload the signed image manifest.
