@@ -18,8 +18,8 @@ const PathInitBlobUpload = "/repo/{repo-name}/v2/{name}/blobs/upload"
 // PathExistsBlob URL.
 const PathExistsBlob = "/repo/{repo-name}/v2/{name}/blobs/{uuid}"
 
-func (registry *DockerRegistry) ExistsBlob(rw http.ResponseWriter, req *http.Request) {
-	log.Info().Msgf("registry.ExistsBlob %s %s", req.Method, req.URL.Path)
+func (registry *DockerRegistry) HasLayer(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("registry.HasLayer %s %s", req.Method, req.URL.Path)
 	vars := mux.Vars(req)
 	name := vars["name"]
 	repoName := vars["repo-name"]

@@ -1,0 +1,16 @@
+docker/registry/blob.go
+    - Pull a layer
+    - Check if blob exists
+    - Delete a layer
+
+docker/registry/manifest.go
+    - Get manifest
+    - Check for a manifest
+
+docker/registry/upload.go
+    - Start an upload
+    - Upload progress
+    - Monolithic Upload
+    - Chunked Upload
+    - Complete Upload
+    - Cancel an upload

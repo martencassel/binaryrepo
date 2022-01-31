@@ -17,6 +17,10 @@ func TestBlob(t *testing.T) {
 	// GET /repo/{repo-name}/v2/<name>/blobs/<digest>
 	t.Run("Pull a Layer", func(t *testing.T) {
 		// Arrange
+		os.RemoveAll("/tmp/filestore")
+		fs := filestore.NewFileStore("/tmp/filestore")
+		index := repo.NewRepoIndex()
+		index.AddRepo(repo.Repo{ID: 1, Name: "test-local", Type: repo.Local, PkgType: repo.Docker})
 		// Act
 		// Assert
 	})
@@ -37,7 +41,7 @@ func TestBlob(t *testing.T) {
 		}
 		req, _ := http.NewRequest(http.MethodHead, "", nil)
 		req = mux.SetURLVars(req, vars)
-		registry.ExistsBlob(res, req)
+		registry.HasLayer(res, req)
 		// Assert
 		assert.Equal(t, http.StatusNotFound, res.Code)
 		assert.Contains(t, "registry/2.0", res.Header().Get("docker-distribution-api-version"))
