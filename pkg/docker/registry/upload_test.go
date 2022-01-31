@@ -18,7 +18,7 @@ import (
 
 func TestUploads(t *testing.T) {
 	// POST /repo/{repo-name}/v2/<name>/blobs/upload
-	t.Run("Initiate Blob Upload", func(t *testing.T) {
+	t.Run("Start an upload", func(t *testing.T) {
 		// Arrange
 		os.RemoveAll("/tmp/filestore")
 		fs := filestore.NewFileStore("/tmp/filestore")
@@ -50,6 +50,11 @@ func TestUploads(t *testing.T) {
 	})
 	// GET /repo/{repo-name}/v2/<name>/blobs/upload/<uuid>
 	t.Run("Get Blob Upload Status", func(t *testing.T) {
+		// Arrange
+		// Act
+		// Assert
+	})
+	t.Run("Monolithic Upload", func(t *testing.T) {
 		// Arrange
 		// Act
 		// Assert
