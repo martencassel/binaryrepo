@@ -22,9 +22,9 @@ func init() {
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Info().Msgf("loggingMiddleware: %s", r.RequestURI)
-		next.ServeHTTP(w, r)
+	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		log.Info().Msgf("loggingMiddleware: %s", req.RequestURI)
+		next.ServeHTTP(rw, req)
 	})
 }
 
@@ -60,8 +60,8 @@ var runCmd = &cobra.Command{
 		dockerRouter := dockerrouter.NewDockerRouter(dockerProxy, dockerRegistry, repoIndex)
 		dockerRouter.RegisterHandlers(r)
 		r.Use(loggingMiddleware)
-		r.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log.Info().Msgf("not-implemented %s %s", r.Method, r.URL)
+		r.PathPrefix("/").HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+			log.Info().Msgf("not-implemented %s %s", req.Method, req.URL)
 			//			vars := mux.Vars(r)
 			//			repoName := vars["repo-name"]
 		})

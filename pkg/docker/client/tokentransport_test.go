@@ -9,8 +9,8 @@ import (
 
 func TestErrBasicAuth(t *testing.T) {
 	ctx := context.Background()
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/" {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if req.URL.Path == "/" {
 			w.Header().Set("www-authenticate", `Basic realm="Registry Realm",service="Docker registry"`)
 			w.WriteHeader(http.StatusUnauthorized)
 		} else {

@@ -67,8 +67,8 @@ func (router *DockerRouter) MonolithicUpload(rw http.ResponseWriter, req *http.R
 	Upload a chunk of data for the specified found
 	PATCH /v2/<name>/blobs/<uuid>
 */
-func (router *DockerRouter) UploadChunk(rw http.ResponseWriter, r *http.Request) {
-	log.Info().Msgf("dockerrouter.UploadChunk %s %s", r.Method, r.URL.Path)
+func (router *DockerRouter) UploadChunk(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("dockerrouter.UploadChunk %s %s", req.Method, req.URL.Path)
 	log.Info().Msg("no implemented")
 }
 
