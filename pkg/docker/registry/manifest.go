@@ -13,6 +13,44 @@ import (
 
 func (registry *DockerRegistry) HasManifest(rw http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("registry.hasManifestHandler %s %s", req.Method, req.URL.Path)
+	vars := mux.Vars(req)
+	name := vars["name"]
+	reference := vars["reference"]
+	dgst, err := digest.Parse(reference)
+	if err != nil {
+		if !registry.tagstore.TagExists(name, reference) {
+			log.Printf("Could not find tag %s:%s", name, reference)
+			rw.WriteHeader(http.StatusNotFound)
+			return
+		}
+		digestStr, err := registry.tagstore.ReadTag(name, reference)
+		if err != nil {
+			log.Print(err)
+			rw.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		log.Printf("Found tag %s:%s with digest %s", name, reference, digestStr)
+		dgst, err = digest.Parse(digestStr)
+		if err != nil {
+			log.Print(err)
+			rw.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+	if !registry.fs.Exists(dgst) {
+		rw.WriteHeader(http.StatusNotFound)
+		return
+	}
+	b, err := registry.fs.ReadFile(dgst)
+	if err != nil {
+		log.Print(err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	rw.Header().Set("Docker-Content-Digest", dgst.String())
+	rw.Header().Set("Content-Length", fmt.Sprintf("%d", len(b)))
+	rw.WriteHeader(http.StatusOK)
+
 }
 
 func (registry *DockerRegistry) GetManifestHandler(rw http.ResponseWriter, req *http.Request) {
