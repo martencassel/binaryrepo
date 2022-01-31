@@ -1,3 +1,4 @@
+
 docker/registry/blob.go
 DONE    - Pull a layer                  DownloadLayer           2
 DONE    - Check if blob exists          HasLayer                1
@@ -14,3 +15,6 @@ docker/registry/upload.go
     - Chunked Upload                                        5
     - Complete Upload                                       5
     - Cancel an upload                                      5
+
+/tmp/uploads
+/tmp/uploads/<uuid>
