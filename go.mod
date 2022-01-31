@@ -13,6 +13,7 @@ require (
 )
 
 require (
+	github.com/containers/image v3.0.2+incompatible
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
@@ -22,4 +23,9 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+)
+
+require (
+	github.com/docker/docker v20.10.12+incompatible // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 )

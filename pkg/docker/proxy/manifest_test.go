@@ -1,7 +1,6 @@
 package dockerproxy
 
 import (
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -16,14 +15,7 @@ import (
 func TestGetManifest(t *testing.T) {
 
 	t.Run("Fetch a manifest", func(t *testing.T) {
-		b, err := os.ReadFile("./testdata/1e916e1a28efae8398ab187eaf75683c6c7ebc71e90f780e19a95465dfd52f")
-		if err != nil {
-			t.Fatal(err)
-		}
-		err = ioutil.WriteFile("/tmp/filestore/13/1e916e1a28efae8398ab187eaf75683c6c7ebc71e90f780e19a95465dfd52f", b, 0777)
-		if err != nil {
-			t.Fatal(err)
-		}
+		os.RemoveAll("/tmp/filestore")
 
 		req, err := http.NewRequest("GET", "http://localhost:8081/repo/docker-remote/v2/redis/manifests/latest", nil)
 		if err != nil {
@@ -55,7 +47,6 @@ func TestGetManifest(t *testing.T) {
 		if res.StatusCode != http.StatusOK {
 			t.Errorf("Status code is not OK: %d", res.StatusCode)
 		}
-
 		assert.Equal(t, "1573", res.Header.Get("Content-Length"))
 		assert.Equal(t, "application/vnd.docker.distribution.manifest.v2+json", res.Header.Get("Content-Type"))
 		assert.Equal(t, "sha256:03f00cd789243846888e2f834c762f53b224b9970b434a192b0f6b533d7e219c", res.Header.Get("docker-content-digest"))

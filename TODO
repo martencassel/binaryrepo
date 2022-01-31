@@ -1,11 +1,11 @@
 docker/registry/blob.go
-    - Pull a layer                  DownloadLayer           2
-    - Check if blob exists          HasLayer                1
-    - Delete a layer                DeleteLayer             2
+DONE    - Pull a layer                  DownloadLayer           2
+DONE    - Check if blob exists          HasLayer                1
+DONE    - Delete a layer                DeleteLayer             2
 
 docker/registry/manifest.go
-    - Get manifest                  GetManifest             1
-    - Check for a manifest          HasManifest             1
+DONE - Get manifest                  GetManifest             1
+     - Check for a manifest          HasManifest             1
 
 docker/registry/upload.go
     - Start an upload                                       5
@@ -14,4 +14,21 @@ docker/registry/upload.go
     - Chunked Upload                                        5
     - Complete Upload                                       5
     - Cancel an upload                                      5
+
+GET /v2/<name>/manifests/<reference>
+
+reference := can be a tag or digest.
+a head request can also be issued to the endpoint
+
+latest -> digest
+digest -> manifest
+
+tag1 -> digest
+tag2 -> digest
+digest -> manifest
+
+
+/tmp/tagstore/test
+/tmp/tagstore/test/latest           33b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855%
+/tmp/filestore/33/b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 -> manifest.json
 
