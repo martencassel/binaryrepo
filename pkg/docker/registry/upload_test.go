@@ -17,8 +17,18 @@ import (
 )
 
 func TestUploads(t *testing.T) {
+	/*
+		Initiate Resumable Upload
+
+		POST /v2/<name>/blobs/uploads/?digest=<digest>
+		Host: <registry host>
+		Authorization: <scheme> <token>
+		Content-Length: <length of blob>
+		Content-Type: application/octect-stream
+		<binary data>
+	*/
 	// POST /repo/{repo-name}/v2/<name>/blobs/upload
-	t.Run("Start an upload", func(t *testing.T) {
+	t.Run("Initiate a resumable blob upload with an empty request body.", func(t *testing.T) {
 		// Arrange
 		os.RemoveAll("/tmp/filestore")
 		fs := filestore.NewFileStore("/tmp/filestore")
@@ -48,19 +58,58 @@ func TestUploads(t *testing.T) {
 		uploadPath := fmt.Sprintf("/tmp/filestore/uploads/%s", res.Header().Get("Docker-Upload-UUID"))
 		assert.True(t, fileExists(uploadPath))
 	})
+	/*
+		Complete the upload in a single request
+
+		POST /v2/<name>/blobs/uploads/?digest=<digest>
+		Host: <registry host>
+		Authorization: <scheme> <token>
+		Content-Length: <length of blob>
+		Content-Type: application/octect-stream
+		<binary data>
+	*/
+	// POST /repo/{repo-name}/v2/<name>/blobs/upload/?digest=<digest>
+	t.Run("Complete upload in a single request", func(t *testing.T) {
+		//		_, _ := os.ReadFile("./testdata/7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631.json")
+	})
+	/*
+		Get Upload Status
+
+		GET /v2/<name>/blobs/uploads/<uuid>
+		Host: <registry host>
+	*/
 	// GET /repo/{repo-name}/v2/<name>/blobs/upload/<uuid>
 	t.Run("Get Blob Upload Status", func(t *testing.T) {
 		// Arrange
+		fs := filestore.NewFileStore("/tmp/filestore")
+		index := repo.NewRepoIndex()
+		index.AddRepo(repo.Repo{ID: 1, Name: "redis-local", Type: repo.Local, PkgType: repo.Docker})
+		registry := NewDockerRegistry(fs, index)
+
 		// Act
+		res := httptest.NewRecorder()
+		vars := map[string]string{
+			"repo-name": "test-local",
+			"name":      "test",
+			"reference": "latest",
+		}
+		req, _ := http.NewRequest(http.MethodGet, "", nil)
+		req = mux.SetURLVars(req, vars)
+		registry.UploadProgress(res, req)
+
 		// Assert
 	})
-	t.Run("Monolithic Upload", func(t *testing.T) {
-		// Arrange
-		// Act
-		// Assert
-	})
+	/*
+		Chunked Upload
+
+		PATCH /v2/<name>/blobs/uploads/<uuid>
+		Content-Length: <size of chunk>
+		Content-Range: <start of range>-<end of range>
+		Content-Type: application/octet-stream
+
+	*/
 	// PATCH /repo/{repo-name}/v2/<name>/blobs/upload/<uuid>
-	t.Run("Upload a chunk of data", func(t *testing.T) {
+	t.Run("Upload a chunk of data to specified upload", func(t *testing.T) {
 		// Arrange
 		os.RemoveAll("/tmp/filestore")
 		fs := filestore.NewFileStore("/tmp/filestore")
@@ -100,12 +149,38 @@ func TestUploads(t *testing.T) {
 		assert.Equal(t, fmt.Sprintf("0-%d", offset), res.Header().Get("range"))
 		assert.Equal(t, "close", res.Header().Get("Connection"))
 	})
+	/*
+		Monolithic Upload
+
+		PUT /v2/<name>/blobs/uploads/<uuid>?digest=<digest>
+		Content-Length: <size of layer>
+		Content-Type: application/octet-stream
+		<Layer Binary Data>
+	*/
+	t.Run("Monolithic Upload", func(t *testing.T) {
+		// Arrange
+		// Act
+		// Assert
+	})
+	/*
+		Complete Upload
+
+		PUT /v2/<name>/blobs/uploads/<uuid>?digest=<digest>
+		Content-Length: <size of chunk>
+		Content-Range: <start of range>-<end of range>
+		Content-Type: application/octet-stream
+
+		<Last Layer Chunk Binary Data>
+	*/
 	// PUT /repo/{repo-name}/v2/<name>/blobs/upload/<uuid>
 	t.Run("Complete the upload", func(t *testing.T) {
 		// Arrange
 		// Act
 		// Assert
 	})
+	/*
+		Canceling an Upload
+	*/
 	// DELETE /repo/{repo-name}/v2/<name>/blobs/upload/<uuid>
 	t.Run("Cancel upload", func(t *testing.T) {
 		// Arrange
