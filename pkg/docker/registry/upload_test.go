@@ -2,6 +2,7 @@ package registry
 
 import (
 	"bytes"
+	_ "crypto/sha256"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -13,13 +14,13 @@ import (
 	"github.com/gorilla/mux"
 	filestore "github.com/martencassel/binaryrepo/pkg/filestore/fs"
 	"github.com/martencassel/binaryrepo/pkg/repo"
+	digest "github.com/opencontainers/go-digest"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestUploads(t *testing.T) {
 	/*
 		Initiate Resumable Upload
-
 		POST /v2/<name>/blobs/uploads/?digest=<digest>
 		Host: <registry host>
 		Authorization: <scheme> <token>
@@ -27,7 +28,7 @@ func TestUploads(t *testing.T) {
 		Content-Type: application/octect-stream
 		<binary data>
 	*/
-	// POST /repo/{repo-name}/v2/<name>/blobs/upload
+	// POST /repo/{repo-name}/v2/<name>/blobs/upload/
 	t.Run("Initiate a resumable blob upload with an empty request body.", func(t *testing.T) {
 		// Arrange
 		os.RemoveAll("/tmp/filestore")
@@ -39,24 +40,24 @@ func TestUploads(t *testing.T) {
 		// Act
 		res := httptest.NewRecorder()
 		req, _ := http.NewRequest("POST", "", nil)
-		req.Header.Add("Accept-Encoding", "gzip")
 		req.Header.Add("Content-Length", "0")
 		vars := map[string]string{
 			"repo-name": "redis-local",
 			"name":      "redis",
 		}
 		req = mux.SetURLVars(req, vars)
-		registry.StartUpload(res, req)
 
 		// Assert
+		registry.StartUpload(res, req)
+		assert.Equal(t, http.StatusAccepted, res.Code)
 		assert.Contains(t, res.Header().Get("Content-Length"), "0")
 		assert.Contains(t, res.Header().Get("docker-distribution-api-version"), "registry/2.0")
 		assert.True(t, IsValidUUID(res.Header().Get("Docker-Upload-UUID")))
 		assert.Equal(t, res.Header().Get("Range"), "0-0")
 		assert.Equal(t, res.Header().Get("connection"), "close")
-		assert.Equal(t, http.StatusAccepted, res.Code)
 		uploadPath := fmt.Sprintf("/tmp/filestore/uploads/%s", res.Header().Get("Docker-Upload-UUID"))
 		assert.True(t, fileExists(uploadPath))
+		assert.Equal(t, res.Header().Get("Location"), fmt.Sprintf("/v2/%s/blobs/uploads/%s", vars["repo-name"], res.Header().Get("Docker-Upload-UUID")))
 	})
 	/*
 		Complete the upload in a single request
@@ -70,7 +71,39 @@ func TestUploads(t *testing.T) {
 	*/
 	// POST /repo/{repo-name}/v2/<name>/blobs/upload/?digest=<digest>
 	t.Run("Complete upload in a single request", func(t *testing.T) {
-		//		_, _ := os.ReadFile("./testdata/7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631.json")
+		// Arrange
+		fs := filestore.NewFileStore("/tmp/filestore")
+		index := repo.NewRepoIndex()
+		index.AddRepo(repo.Repo{ID: 1, Name: "redis-local", Type: repo.Local, PkgType: repo.Docker})
+		registry := NewDockerRegistry(fs, index)
+		b, err := os.ReadFile("./testdata/7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		id := digest.FromBytes(b)
+
+		// Act
+		res := httptest.NewRecorder()
+		vars := map[string]string{
+			"repo-name": "test-local",
+			"name":      "test",
+			"reference": "latest",
+		}
+		req, _ := http.NewRequest(http.MethodPost, "", bytes.NewReader(b))
+		req = mux.SetURLVars(req, vars)
+		req.Header.Add("Content-Length", fmt.Sprintf("%d", len(b)))
+		req.Header.Add("Content-Type", "application/octet-stream")
+		q := req.URL.Query()
+		q.Add("digest", id.String())
+		registry.UploadChunk(res, req)
+
+		// Assert
+		offset := len(b) - 1
+		assert.Equal(t, http.StatusAccepted, res.Code)
+		assert.Contains(t, "registry/2.0", res.Header().Get("docker-distribution-api-version"))
+		assert.Contains(t, "0", res.Header().Get("Content-Length"))
+		assert.True(t, IsValidUUID(res.Header().Get("docker-upload-uuid")))
+		assert.Equal(t, fmt.Sprintf("0-%d", offset), res.Header().Get("range"))
 	})
 	/*
 		Get Upload Status
@@ -187,5 +220,4 @@ func TestUploads(t *testing.T) {
 		// Act
 		// Assert
 	})
-
 }
