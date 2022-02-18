@@ -1,0 +1,23 @@
+https://docs.docker.com/registry/spec/api/#pushing-an-image
+
+Pushing an image
+    Starting the upload
+    Checking for existing layers
+    Upload the layer
+    Upload progress
+    Monolithic upload
+    Chunked upload
+    Completed upload
+    Cancelling an upload
+    Deleteting an layer
+    Pushing an image manifest
+
+Pulling an image
+    Pulling an image manifest
+    Pulling an layer
+
+Listing Repositories
+
+Listing Image Tags
+
+Deleting an Image

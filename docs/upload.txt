@@ -1,0 +1,138 @@
+* Initiate Blob Upload
+Uses:
+1. Create a resumable uploads.
+2. Monolithic uploads.
+
+* Initiate a resumable blob upload.
+If successful, an upload location will be provided to complete the upload.
+Optionally the <digest> parameter is present, the request body will be used
+to complete the upload in a single request.
+
+Case 1.
+Upload a blob identified by the digest parameter in single request.
+This upload will not be resumable unless a recoverable error is returned.
+
+POST /v2/<name>/blobs/uploads/?digest=<digest>
+Host: <registry host>
+Authorization: <scheme> <token>
+Content-Length: <length of blob>
+Content-Type: application/octect-stream
+
+<binary data>
+
+On Success: Created
+201 Created
+Location: <blob location>
+Content-Length: 0
+Docker-Upload-UUID: <uuid>
+
+On Failure: Invalid Name or Digest
+400 Bad Request
+
+DIGEST_INVALID      provided digst did not match uploaded content
+NAME_INVALID        invalid repository name
+
+On Failure: 405 Method Not Allowed
+
+On Failure: No Such Repository Error
+The repository is not known to the registry.
+
+404 Not Found
+Content-Length: <length>
+Content-Type: application/json; charset=utf-8
+
+* Initiate Resumable Blob Upload
+
+POST /v2/<name>/blobs/uploads/
+Host: <registry host>
+Authorization: <scheme> <token>
+Content-Length: 0
+
+Initiate a resumable blob upload with an empty request body.
+
+On Success: Accepted
+202 Accepted
+Content-Length: 0
+Location: /v2/<name>/blobs/uploads/<uuid>
+Range: 0-0
+Docker-Upload-UUID: <uuid>
+
+Range	Range header indicating the progress of the upload.
+When starting an upload, it will return an empty range, since no content has been received.
+
+* Blob Upload
+Interact with blob uploads.
+Client should only take URLs through the Location header on related API requests.
+
+** Get Blob Upload
+GET /v2/<name>/blobs/uploads/<uuid>
+Host: <registry host>
+Authorization: <scheme> <token>
+
+On Success: Upload Progress
+204 No Content
+Range: 0-<offset>
+Content-Length: 0
+Docker-Upload-UUID: <uuid>
+The upload is known and in progress. The last received offset is available in the Range header.
+
+On Failure: Bad Request
+400 Bad Request
+Content-Type: application/json; charset=utf-8
+
+On Failure: Not Found
+404 Not Found
+The upload is unknown to the registry. The upload must be restarted.
+
+* PATCH Blob Upload
+Upload a chunk of data for the specified upload
+
+
+* Chunked upload
+PATCH /v2/<name>/blobs/uploads/<uuid>
+Host: <registry host>
+Authorization: <scheme> <token>
+Content-Range: <start of range>-<end of range, inclusive>
+Content-Length: <length of chunk>
+Content-Type: application/octet-stream
+<binary chunk>
+
+Upload a chunk of data to specified upload without completing the upload.
+The data will be uploaded to the specified Content Range.
+
+On Success: Chunk Accepted
+204 No Content
+Location: /v2/<name>/blobs/uploads/<uuid>
+Range: 0-<offset>
+Content-Length: 0
+Docker-Upload-UUID: <uuid>
+
+* PUT Blob Upload
+Complete the upload specified by uuid, optionally appending the body as the final chunk.
+
+PUT /v2/<name>/blobs/uploads/<uuid>?digest=<digest>
+Host: <registry host>
+Authorization: <scheme> <token>
+Content-Length: <length of data>
+Content-Type: application/octet-stream
+<binary data>
+
+Complete the upload, providing all the data in the body, if necessary.
+A request without a body will just complete the upload with previously uploaded content.
+
+On Success: Upload Complete
+204 No Content
+Location: <blob location>
+Content-Range: <start of range>-<end of range, inclusive>
+Content-Length: 0
+Docker-Content-Digest: <digest>
+
+DELETE Blob Upload
+Cancel outstanding upload processes, releasing associated resources. If this is not called, the unfinished uploads will eventually timeout.
+
+DELETE /v2/<name>/blobs/uploads/<uuid>
+Host: <registry host>
+Authorization: <scheme> <token>
+Content-Length: 0
+Cancel the upload specified by uuid.
+

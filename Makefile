@@ -1,3 +1,5 @@
+go_version = 1.17.7
+
 APP_VERSION?=$(shell git rev-parse --short HEAD)
 
 GO_SRCS := $(shell find . -type f -name '*.go' -a ! -name 'zz_generated*')
@@ -12,8 +14,15 @@ golint := $(shell which golangci-lint)
 .PHONY: build
 build: lint server
 
-
 TARGET_OS ?= linux
+
+binaryrepo: $(GO_SRCS)
+			$(GO) build -o $(BUILD_DIR)/binaryrepo -ldflags "-X github.com/martencassel/binaryrepo/pkg/util/version.V=$(APP_VERSION)" ./cmd/binary-repo
+
+build.docker-image: docker/Dockerfile
+	docker build --rm \
+		--build-arg BUILDIMAGE=golang:$(go_version)-alpine \
+		-t binaryrepo:latest -f docker/Dockerfile .
 
 .PHONY: check-remote-pull
 check-remote-pull: build reverse-proxy start

@@ -1,7 +1,7 @@
 #!/bin/bash
 docker image pull docker-remote.example.com/alpine:latest
 
-rm -rf /tmp/distribution-spec && cd /tmp && git clone https://github.com/opencontainers/distribution-spec.git && cd distribution-spec/conformance
+rm -rf /tmp/distribution-spec && cd /tmp && git clone https://github.com/opencontainers/distribution-spec.git && cd distribution-spec/conformance && go test -c
 go test -c
 export OCI_ROOT_URL=http://localhost:8081/repo/docker-remote
 export OCI_TEST_PUSH=0
