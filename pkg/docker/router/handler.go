@@ -32,10 +32,14 @@ const PathGetManifest2 = "/repo/{repo-name}/v2/{namespace}/{namespace2}/manifest
 const PathGetBlob1 = "/repo/{repo-name}/v2/{namespace}/blobs/{digest}"
 const PathGetBlob2 = "/repo/{repo-name}/v2/{namespace1}/{namespace2}/blobs/{digest}"
 
+// PUT /repo/docker-local/v2/test/blobs/uploads/8410da2d-9107-11ec-b583-0242ac1f0003
+
 // Push endpoints
 const PathUploadBlob1 = "/repo/{repo-name}/v2/{namespace}/blobs/uploads/"
 const PathUploadBlob2 = "/repo/{repo-name}/v2/{namespace1}/{namespace2}/blobs/uploads/"
 const PathUploadBlob3 = "/repo/{repo-name}/v2/{namespace}/blobs/uploads/{uuid}"
+//Path:"/repo/docker-local/repo/docker-local/v2/docker-local/blobs/uploads/84fa28f8-90fd-11ec-a736-0242ac1e0003"
+
 const PathUploadBlob4 = "/repo/{repo-name}/v2/{namespace1}/{namespace2}/blobs/uploads/{uuid}"
 
 func (router *DockerRouter) RegisterHandlers(r *mux.Router) {
@@ -58,14 +62,19 @@ func (router *DockerRouter) RegisterHandlers(r *mux.Router) {
 	// GET /v2/<name>/blobs/<digest>
 	r.HandleFunc(dockerproxy.PathHeadManifest1, router.HasManifest).Methods(http.MethodHead)
 	r.HandleFunc(dockerproxy.PathGetManifest2, router.HasManifest).Methods(http.MethodHead)
+
 	r.HandleFunc(PathGetManifest1, router.GetManifestHandler).Methods(http.MethodGet)
 	r.HandleFunc(PathGetManifest2, router.GetManifestHandler).Methods(http.MethodGet)
+
 	r.HandleFunc(PathGetBlob1, router.DownloadLayer).Methods(http.MethodGet)
 	r.HandleFunc(PathGetBlob2, router.DownloadLayer).Methods(http.MethodGet)
+
 	r.HandleFunc(PathUploadBlob1, router.StartUpload).Methods(http.MethodPost)
 	r.HandleFunc(PathUploadBlob2, router.StartUpload).Methods(http.MethodPost)
+
 	r.HandleFunc(PathUploadBlob3, router.UploadChunk).Methods(http.MethodPatch)
 	r.HandleFunc(PathUploadBlob4, router.UploadChunk).Methods(http.MethodPatch)
-	r.HandleFunc(PathUploadBlob3, router.UploadChunk).Methods(http.MethodPatch)
-	r.HandleFunc(PathUploadBlob4, router.UploadChunk).Methods(http.MethodPatch)
+
+	r.HandleFunc(PathUploadBlob3, router.UploadChunk).Methods(http.MethodPut)
+	r.HandleFunc(PathUploadBlob4, router.UploadChunk).Methods(http.MethodPut)
 }

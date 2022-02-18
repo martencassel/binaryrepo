@@ -13,7 +13,9 @@ docker run --rm -v $(pwd)/certs:/certs ehazlett/certm -d /certs \
     ca generate -o=local --overwrite
 
 docker run --rm -v $(pwd)/certs:/certs ehazlett/certm -d /certs \
-    server generate --host docker-remote.example.com -o=local --overwrite
+    server generate --host docker-remote.example.com \
+                    --host docker-local.example.com \
+                    -o=local --overwrite
 
 # Fedora
 sudo cp ./certs/ca.pem /etc/pki/ca-trust/source/anchors/

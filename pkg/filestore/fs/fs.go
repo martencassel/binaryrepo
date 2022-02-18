@@ -75,6 +75,9 @@ func (fs *FileStore) WriteFile(b []byte) (digest.Digest, error) {
 }
 
 func (fs *FileStore) ReadFile(digest digest.Digest) ([]byte, error) {
+	if !fs.Exists(digest) {
+		return nil, nil
+	}
 	filePath, _, _ := getFilePath(fs.BasePath, digest)
 	file, err := os.Stat(filePath)
 	if err != nil {

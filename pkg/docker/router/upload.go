@@ -64,8 +64,19 @@ func (router *DockerRouter) MonolithicUpload(rw http.ResponseWriter, req *http.R
 	Docker-Upload-UUID: <uuid>
 */
 /*
-	Upload a chunk of data for the specified found
-	PATCH /v2/<name>/blobs/<uuid>
+	PATCH /v2/<name>/blobs/uploads/<uuid>
+	Content-Length: <size of chunk>
+	Content-Range: <start of range>-<end of range>
+	Content-Type: application/octet-stream
+	<Layer Chunk Binary Data>
+
+	PUT /v2/<name>/blobs/uploads/<uuid>?digest=<digest>
+	Host: <registry host>
+	Authorization: <scheme> <token>
+	Content-Length: <length of data>
+	Content-Type: application/octet-stream
+	<binary data>
+
 */
 func (router *DockerRouter) UploadChunk(rw http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("dockerrouter.UploadChunk %s %s", req.Method, req.URL.Path)

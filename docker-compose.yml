@@ -14,10 +14,11 @@ services:
     build:
       context: .
       dockerfile: ./docker/Dockerfile
-    command: /usr/bin/tail -f /dev/null
+    command: /src/build/binaryrepo run
     working_dir: /src
     ports:
       - "2345:2345"
+      - "8081:8081"
     expose:
       - "2345"
     volumes:

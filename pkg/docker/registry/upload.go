@@ -17,9 +17,11 @@ import (
 func (registry *DockerRegistry) StartUpload(rw http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("registry.StartUpload %s %s", req.Method, req.URL.Path)
 	vars := mux.Vars(req)
-	name := vars["name"]
+	namespace := vars["namespace"]
 	repoName := vars["repo-name"]
-	if registry.index.FindRepo(repoName) == nil || name == "" {
+	// hello
+	repo := registry.index.FindRepo(repoName)
+	if repo == nil || namespace == "" {
 		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -30,7 +32,7 @@ func (registry *DockerRegistry) StartUpload(rw http.ResponseWriter, req *http.Re
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	loc := fmt.Sprintf("/repo/%s/v2/%s/blobs/uploads/%s", repoName, name, uuid)
+	loc := fmt.Sprintf("/repo/%s/v2/%s/blobs/uploads/%s", repoName, namespace, uuid)
 	rw.Header().Set("Content-Length", "0")
 	rw.Header().Set("docker-distribution-api-version", "registry/2.0")
 	rw.Header().Set("Docker-Upload-UUID", uuid.String())

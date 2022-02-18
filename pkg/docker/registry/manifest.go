@@ -56,7 +56,7 @@ func (registry *DockerRegistry) HasManifest(rw http.ResponseWriter, req *http.Re
 func (registry *DockerRegistry) GetManifestHandler(rw http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("registry.getManifest %s %s", req.Method, req.URL.Path)
 	vars := mux.Vars(req)
-	name := vars["name"]
+	name := vars["namespace"]
 	reference := vars["reference"]
 	dgst, err := digest.Parse(reference)
 	if err != nil {
@@ -83,6 +83,10 @@ func (registry *DockerRegistry) GetManifestHandler(rw http.ResponseWriter, req *
 	if err != nil {
 		log.Print(err)
 		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if b == nil && err == nil {
+		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 	contentType := manifest.GuessMIMEType(b)
