@@ -69,22 +69,8 @@ func (u *UploadManager) Exists(uuid string) bool {
 	return err == nil
 }
 
-// Status of upload.
-//
-// Input: <uuid>
-// Impl:
-//		1. Open the <uuid> file.
-//		2. Read the file size
-// 		3. Return the offset = file size - 1
-// Output: Range: bytes=0-<offset>
-
-// Monolithic upload.
-//
-// Write single chunk to upload file.
-// Input: <uuid>, <digest>, <Layer Binary Data>, <Size of Layer Binary Data>
-// Output: The layer is written to the upload file <uuid>
-
-// Chunked upload.
-//
-// Write chunk to upload file using range header offset.
-// Input: <uuid>, <content-length>, <layer binary data>
+func (u *UploadManager) Remove(uuid string) error {
+	filePath := filepath.Join(u.BasePath, uuid)
+	err := os.Remove(filePath)
+	return err
+}

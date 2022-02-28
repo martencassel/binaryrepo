@@ -64,7 +64,7 @@ func (router *DockerRouter) DeleteLayer(rw http.ResponseWriter, req *http.Reques
 		return
 	}
 	if _repo.Type == repo.Local && _repo.PkgType == repo.Docker {
-		router.registry.HasLayer(rw, req)
+		router.registry.DeleteLayer(rw, req)
 	}
 	rw.WriteHeader(http.StatusNotFound)
 }

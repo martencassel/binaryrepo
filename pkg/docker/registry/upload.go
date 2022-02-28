@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	digest "github.com/opencontainers/go-digest"
 	log "github.com/rs/zerolog/log"
 )
 
@@ -19,11 +20,44 @@ func (registry *DockerRegistry) StartUpload(rw http.ResponseWriter, req *http.Re
 	vars := mux.Vars(req)
 	namespace := vars["namespace"]
 	repoName := vars["repo-name"]
+	urlParams := req.URL.Query()
+	param_digest := urlParams.Get("digest")
 	repo := registry.index.FindRepo(repoName)
 	if repo == nil || namespace == "" {
 		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
+
+	// Check if monolithic upload. digest != ""
+	if param_digest != "" {
+		dgst, err := digest.Parse(param_digest)
+		if err != nil {
+			rw.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		log.Info().Msgf("Digest: %s", dgst)
+
+		body, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			rw.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		dgst, err = registry.fs.WriteFile(body)
+		if err != nil {
+			log.Error().Msg(err.Error())
+			rw.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		log.Info().Msgf("Digest: %s", dgst)
+
+		loc := fmt.Sprintf("/repo/%s/v2/%s/blobs/%s", repoName, namespace, dgst)
+		rw.Header().Set("Location", loc)
+		rw.Header().Set("Content-Length", "0")
+		rw.Header().Set("Docker-Upload-UUID", param_digest)
+		rw.WriteHeader(http.StatusCreated)
+		return
+	}
+
 	uuid, _ := uuid.NewUUID()
 
 	err := registry.uploader.WriteFile(uuid.String(), []byte{})
@@ -32,6 +66,7 @@ func (registry *DockerRegistry) StartUpload(rw http.ResponseWriter, req *http.Re
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	loc := fmt.Sprintf("/repo/%s/v2/%s/blobs/uploads/%s", repoName, namespace, uuid)
 	rw.Header().Set("Content-Length", "0")
 	rw.Header().Set("docker-distribution-api-version", "registry/2.0")
@@ -100,6 +135,10 @@ func (registry *DockerRegistry) UploadChunk(rw http.ResponseWriter, req *http.Re
 		log.Info().Msgf("Digest: %s", digest)
 		rw.Header().Set("Location", fmt.Sprintf("/v2/%s/blobs/%s", repoName, digest))
 		rw.Header().Set("Content-Length", "0")
+
+		// Remove the upload
+		registry.uploader.Remove(uuid)
+
 		rw.WriteHeader(http.StatusCreated)
 		return
 	}
@@ -122,6 +161,16 @@ func (registry *DockerRegistry) UploadChunk(rw http.ResponseWriter, req *http.Re
 	}
 	registry.uploader.AppendFile(uuid, body)
 
+	// Test
+	dgst, err := registry.fs.WriteFile(body)
+	if err != nil {
+		log.Error().Msg(err.Error())
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	log.Info().Msgf("Digest: %s", dgst)
+
+
 	location := fmt.Sprintf("/repo/%s/v2/%s/blobs/uploads/%s", repoName, name, uuid)
 	offset := len(body) - 1
 	rw.Header().Set("Content-Length", "0")
@@ -130,6 +179,9 @@ func (registry *DockerRegistry) UploadChunk(rw http.ResponseWriter, req *http.Re
 	rw.Header().Set("Location", location)
 	rw.Header().Set("Range", fmt.Sprintf("0-%d", offset))
 	//rw.Header().Set("connection", "close")
+	if req.Method == http.MethodPut {
+		rw.WriteHeader(http.StatusCreated)
+	}
 	rw.WriteHeader(http.StatusAccepted)
 }
 

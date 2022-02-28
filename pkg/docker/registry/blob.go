@@ -74,10 +74,10 @@ func (registry *DockerRegistry) DownloadLayer(rw http.ResponseWriter, req *http.
 	name := vars["name"]
 	repoName := vars["repo-name"]
 	d := vars["digest"]
-	if req.Method != http.MethodHead {
+/*	if req.Method != http.MethodHead || req.Method != http.MethodGet {
 		rw.WriteHeader(http.StatusMethodNotAllowed)
 		return
-	}
+	}*/
 	if registry.index.FindRepo(repoName) == nil || name == "" || d == "" {
 		rw.WriteHeader(http.StatusNotFound)
 		return
@@ -119,7 +119,7 @@ func (registry *DockerRegistry) DeleteLayer(rw http.ResponseWriter, req *http.Re
 	name := vars["name"]
 	repoName := vars["repo-name"]
 	d := vars["digest"]
-	if req.Method != http.MethodHead {
+	if req.Method != http.MethodDelete {
 		rw.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}

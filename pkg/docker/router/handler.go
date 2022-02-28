@@ -89,6 +89,9 @@ func (router *DockerRouter) RegisterHandlers(r *mux.Router) {
 	r.HandleFunc(PathUploadBlob3, router.UploadChunk).Methods(http.MethodPut)
 	r.HandleFunc(PathUploadBlob4, router.UploadChunk).Methods(http.MethodPut)
 
+	r.HandleFunc(PathGetBlob1, router.DeleteLayer).Methods(http.MethodDelete)
+	r.HandleFunc(PathGetBlob1, router.DeleteLayer).Methods(http.MethodDelete)
+
 
 }
 
