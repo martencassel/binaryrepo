@@ -8,6 +8,7 @@ import (
 	dockerproxy "github.com/martencassel/binaryrepo/pkg/docker/proxy"
 	dockerregistry "github.com/martencassel/binaryrepo/pkg/docker/registry"
 	dockerrouter "github.com/martencassel/binaryrepo/pkg/docker/router"
+	"github.com/martencassel/binaryrepo/pkg/docker/uploader"
 
 	"github.com/gorilla/mux"
 	filestore "github.com/martencassel/binaryrepo/pkg/filestore/fs"
@@ -35,6 +36,7 @@ var runCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Info().Str("version", version.AppVersion()).Msg("running server")
 		fs := filestore.NewFileStore("/tmp/filestore")
+		uploader := uploader.NewUploadManager("/tmp/uploads")
 		repoIndex := repo.NewRepoIndex()
 		hubUser := os.Getenv("DOCKERHUB_USERNAME")
 		hubPass := os.Getenv("DOCKERHUB_PASSWORD")
@@ -55,7 +57,7 @@ var runCmd = &cobra.Command{
 		})
 		r := mux.NewRouter()
 		dockerProxy := dockerproxy.NewProxyAppWithOptions(fs, repoIndex)
-		dockerRegistry := dockerregistry.NewDockerRegistry(fs, repoIndex)
+		dockerRegistry := dockerregistry.NewDockerRegistry(fs, repoIndex, uploader)
 
 		dockerRouter := dockerrouter.NewDockerRouter(dockerProxy, dockerRegistry, repoIndex)
 		dockerRouter.RegisterHandlers(r)

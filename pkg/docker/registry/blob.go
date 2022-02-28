@@ -21,7 +21,7 @@ const PathExistsBlob = "/repo/{repo-name}/v2/{name}/blobs/{uuid}"
 func (registry *DockerRegistry) HasLayer(rw http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("registry.HasLayer %s %s", req.Method, req.URL.Path)
 	vars := mux.Vars(req)
-	name := vars["name"]
+	name := vars["namespace"]
 	repoName := vars["repo-name"]
 	d := vars["digest"]
 	if req.Method != http.MethodHead {

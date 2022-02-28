@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
+	"github.com/martencassel/binaryrepo/pkg/docker/uploader"
 	filestore "github.com/martencassel/binaryrepo/pkg/filestore/fs"
 	"github.com/martencassel/binaryrepo/pkg/repo"
 	"github.com/stretchr/testify/assert"
@@ -21,6 +22,7 @@ func TestManifest(t *testing.T) {
 	t.Run("Pull a manifest", func(t *testing.T) {
 		// Arrange
 		os.RemoveAll("/tmp/filestore")
+		uploader := uploader.NewUploadManager("/tmp")
 		fs := filestore.NewFileStore("/tmp/filestore")
 		index := repo.NewRepoIndex()
 		b, err := os.ReadFile("./testdata/7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631.json")
@@ -33,7 +35,7 @@ func TestManifest(t *testing.T) {
 		}
 		log.Println(digest)
 		index.AddRepo(repo.Repo{ID: 1, Name: "test-local", Type: repo.Local, PkgType: repo.Docker})
-		registry := NewDockerRegistry(fs, index)
+		registry := NewDockerRegistry(fs, index, uploader)
 		err = registry.tagstore.WriteTag("test", "latest", "sha256:7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631")
 		if err != nil {
 			t.Fatal(err)
@@ -62,6 +64,7 @@ func TestManifest(t *testing.T) {
 	t.Run("Check if manifest exists", func(t *testing.T) {
 		// Arrange
 		os.RemoveAll("/tmp/filestore")
+		uploader := uploader.NewUploadManager("/tmp")
 		fs := filestore.NewFileStore("/tmp/filestore")
 		index := repo.NewRepoIndex()
 		b, err := os.ReadFile("./testdata/7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631.json")
@@ -74,7 +77,7 @@ func TestManifest(t *testing.T) {
 		}
 		log.Println(digest)
 		index.AddRepo(repo.Repo{ID: 1, Name: "test-local", Type: repo.Local, PkgType: repo.Docker})
-		registry := NewDockerRegistry(fs, index)
+		registry := NewDockerRegistry(fs, index, uploader)
 		err = registry.tagstore.WriteTag("test", "latest", "sha256:7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631")
 		if err != nil {
 			t.Fatal(err)
@@ -98,10 +101,11 @@ func TestManifest(t *testing.T) {
 	t.Run("Push a manifest", func(t *testing.T) {
 		// Arrange
 		os.RemoveAll("/tmp/filestore")
+		uploader := uploader.NewUploadManager("/tmp")
 		fs := filestore.NewFileStore("/tmp/filestore")
 		index := repo.NewRepoIndex()
 		index.AddRepo(repo.Repo{ID: 1, Name: "redis-local", Type: repo.Local, PkgType: repo.Docker})
-		registry := NewDockerRegistry(fs, index)
+		registry := NewDockerRegistry(fs, index , uploader)
 		// Act
 		res := httptest.NewRecorder()
 		vars := map[string]string{

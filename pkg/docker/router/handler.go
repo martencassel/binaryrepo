@@ -42,6 +42,8 @@ const PathUploadBlob3 = "/repo/{repo-name}/v2/{namespace}/blobs/uploads/{uuid}"
 
 const PathUploadBlob4 = "/repo/{repo-name}/v2/{namespace1}/{namespace2}/blobs/uploads/{uuid}"
 
+const PathPutManifest = "/repo/{repo-name}/v2/{name}/manifests/{reference}"
+
 func (router *DockerRouter) RegisterHandlers(r *mux.Router) {
 	log.Info().Msg("Registering handlers")
 	// GET /v2/
@@ -66,15 +68,59 @@ func (router *DockerRouter) RegisterHandlers(r *mux.Router) {
 	r.HandleFunc(PathGetManifest1, router.GetManifestHandler).Methods(http.MethodGet)
 	r.HandleFunc(PathGetManifest2, router.GetManifestHandler).Methods(http.MethodGet)
 
+	r.HandleFunc(PathPutManifest, router.registry.PutManifest).Methods(http.MethodPut)
+
 	r.HandleFunc(PathGetBlob1, router.DownloadLayer).Methods(http.MethodGet)
 	r.HandleFunc(PathGetBlob2, router.DownloadLayer).Methods(http.MethodGet)
 
+
+	r.HandleFunc(PathGetBlob1, router.HasLayer).Methods(http.MethodHead)
+	r.HandleFunc(PathGetBlob2, router.HasLayer).Methods(http.MethodHead)
+
+	// Starting an upload. HTTP POST
 	r.HandleFunc(PathUploadBlob1, router.StartUpload).Methods(http.MethodPost)
 	r.HandleFunc(PathUploadBlob2, router.StartUpload).Methods(http.MethodPost)
 
+	// Chunked upload. HTTP PATCH
 	r.HandleFunc(PathUploadBlob3, router.UploadChunk).Methods(http.MethodPatch)
 	r.HandleFunc(PathUploadBlob4, router.UploadChunk).Methods(http.MethodPatch)
 
+	// Monolithic upload or Complete the Upload. HTTP PUT
 	r.HandleFunc(PathUploadBlob3, router.UploadChunk).Methods(http.MethodPut)
 	r.HandleFunc(PathUploadBlob4, router.UploadChunk).Methods(http.MethodPut)
+
+
 }
+
+
+/*
+	1. Monolithic Upload
+	PUT	/v2/<name>/blobs/uploads/<uuid>?digest=<digest>
+	A monolithic upload is simply a chunked upload with a
+	single chunk and may be favored by clients that would like
+	to avoided the complexity of chunking.
+	To carry out a “monolithic” upload, one can simply put
+	the entire content blob to the provided URL:
+	PUT /v2/<name>/blobs/uploads/<uuid>?digest=<digest>
+	Content-Length: <size of layer>
+	Content-Type: application/octet-stream
+
+	<Layer Binary Data>
+
+	2. Completed Upload
+	PUT /v2/<name>/blobs/uploads/<uuid>?digest=<digest>
+	Content-Length: <size of chunk>
+	Content-Range: <start of range>-<end of range>
+	Content-Type: application/octet-stream
+	<Last Layer Chunk Binary Data>
+
+	3. PUT /v2/<name>/blobs/uploads/<uuid>?digest=<digest>
+	Content-Length: 0
+	Content-Type: application/octet-stream
+	<Empty Body>
+
+	201 Created
+	Location: /v2/<name>/blobs/<digest>
+	Content-Length: 0
+	Docker-Content-Digest: <digest>
+*/

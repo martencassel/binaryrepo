@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 
+	"github.com/martencassel/binaryrepo/pkg/docker/uploader"
 	filestore "github.com/martencassel/binaryrepo/pkg/filestore/fs"
 	"github.com/martencassel/binaryrepo/pkg/repo"
 )
@@ -20,6 +21,7 @@ func TestBlob(t *testing.T) {
 	t.Run("Pull a Layer", func(t *testing.T) {
 		// Arrange
 		os.RemoveAll("/tmp/filestore")
+		uploader := uploader.NewUploadManager("/tmp")
 		fs := filestore.NewFileStore("/tmp/filestore")
 		index := repo.NewRepoIndex()
 		b, err := os.ReadFile("./testdata/7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631.json")
@@ -32,7 +34,7 @@ func TestBlob(t *testing.T) {
 		}
 		log.Println(digest)
 		index.AddRepo(repo.Repo{ID: 1, Name: "test-local", Type: repo.Local, PkgType: repo.Docker})
-		registry := NewDockerRegistry(fs, index)
+		registry := NewDockerRegistry(fs, index, uploader)
 		// Act
 		res := httptest.NewRecorder()
 		vars := map[string]string{
@@ -57,6 +59,7 @@ func TestBlob(t *testing.T) {
 	t.Run("Check if blob exists", func(t *testing.T) {
 		// Arrange
 		os.RemoveAll("/tmp/filestore")
+		uploader := uploader.NewUploadManager("/tmp")
 		fs := filestore.NewFileStore("/tmp/filestore")
 		index := repo.NewRepoIndex()
 		b, err := os.ReadFile("./testdata/7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631.json")
@@ -69,7 +72,7 @@ func TestBlob(t *testing.T) {
 		}
 		log.Println(digest)
 		index.AddRepo(repo.Repo{ID: 1, Name: "test-local", Type: repo.Local, PkgType: repo.Docker})
-		registry := NewDockerRegistry(fs, index)
+		registry := NewDockerRegistry(fs, index, uploader)
 		req, _ := http.NewRequest(http.MethodHead, "", nil)
 		res := httptest.NewRecorder()
 		vars := map[string]string{
@@ -88,6 +91,7 @@ func TestBlob(t *testing.T) {
 	t.Run("Deleting a Layer", func(t *testing.T) {
 		// Arrange
 		os.RemoveAll("/tmp/filestore")
+		uploader := uploader.NewUploadManager("/tmp")
 		fs := filestore.NewFileStore("/tmp/filestore")
 		index := repo.NewRepoIndex()
 		b, err := os.ReadFile("./testdata/7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631.json")
@@ -109,7 +113,7 @@ func TestBlob(t *testing.T) {
 		}
 		req, _ := http.NewRequest(http.MethodHead, "", nil)
 		req = mux.SetURLVars(req, vars)
-		registry := NewDockerRegistry(fs, index)
+		registry := NewDockerRegistry(fs, index, uploader)
 		registry.DeleteLayer(res, req)
 		// Assert
 		assert.Equal(t, http.StatusAccepted, res.Code)

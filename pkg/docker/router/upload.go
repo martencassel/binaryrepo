@@ -80,7 +80,7 @@ func (router *DockerRouter) MonolithicUpload(rw http.ResponseWriter, req *http.R
 */
 func (router *DockerRouter) UploadChunk(rw http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("dockerrouter.UploadChunk %s %s", req.Method, req.URL.Path)
-	log.Info().Msg("no implemented")
+	router.registry.UploadChunk(rw, req)
 }
 
 /*
