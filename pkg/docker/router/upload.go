@@ -10,7 +10,8 @@ import (
 
 /*
 	Start an upload
-	POST /v2/<name>/blobs/uploads
+
+	POST /v2/<name>/blobs/uploads/
 */
 func (router *DockerRouter) StartUpload(rw http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("dockerrouter.StartUpload %s %s", req.Method, req.URL.Path)

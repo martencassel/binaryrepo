@@ -12,8 +12,17 @@ import (
 )
 
 /*
-	Start an upload
-	POST /v2/<name>/blobs/uploads
+	Starting an Upload
+
+	POST /v2/<name>/blobs/uploads/
+
+	Initiate a resumable blob upload.
+	If successful, an upload location will be provided
+	to complete the upload.
+
+	Optionally, if the digest parameter is present,
+	the request body will be used to complete
+	the upload in a single request.
 */
 func (registry *DockerRegistry) StartUpload(rw http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("registry.StartUpload %s %s", req.Method, req.URL.Path)
@@ -97,7 +106,10 @@ func (registry *DockerRegistry) MonolithicUpload(rw http.ResponseWriter, req *ht
 
 /*
 	Chunked upload
+
 	PATCH /v2/<name>/blobs/uploads/<uuid>
+
+	Upload a chunk of data for the specified upload.
 */
 func (registry *DockerRegistry) UploadChunk(rw http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("registry.UploadChunk %s %s", req.Method, req.URL.Path)

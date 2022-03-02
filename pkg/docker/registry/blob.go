@@ -18,6 +18,11 @@ const PathInitBlobUpload = "/repo/{repo-name}/v2/{name}/blobs/upload"
 // PathExistsBlob URL.
 const PathExistsBlob = "/repo/{repo-name}/v2/{name}/blobs/{uuid}"
 
+/*
+	Existing Layers
+
+	HEAD /v2/<name>/blobs/<digest>
+*/
 func (registry *DockerRegistry) HasLayer(rw http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("registry.HasLayer %s %s", req.Method, req.URL.Path)
 	vars := mux.Vars(req)
@@ -68,6 +73,13 @@ func IsValidUUID(u string) bool {
 	return err == nil
 }
 
+/*
+	Pulling a layer
+
+
+
+	GET /v2/<name>/blobs/<digest>
+*/
 func (registry *DockerRegistry) DownloadLayer(rw http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("registry.DownloadLayer %s %s", req.Method, req.URL.Path)
 	vars := mux.Vars(req)
@@ -111,6 +123,7 @@ func (registry *DockerRegistry) DownloadLayer(rw http.ResponseWriter, req *http.
 
 /*
 	Deleting a Layer
+
 	DELETE /v2/<name>/blobs/<digest>
 */
 func (registry *DockerRegistry) DeleteLayer(rw http.ResponseWriter, req *http.Request) {
