@@ -53,12 +53,17 @@ func (u *UploadManager) WriteFile(uuid string, bytes []byte) error {
 func (u *UploadManager) AppendFile(uuid string, bytes []byte) error {
 	filename := filepath.Join(u.BasePath, uuid)
 	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-	defer f.Close()
+
 	if err != nil {
 		return err
 	}
 	if _, err = f.Write(bytes); err != nil {
-		panic(err)
+		return err
+	}
+
+	err =  f.Close()
+	if err != nil {
+		return err
 	}
 	return nil
 }

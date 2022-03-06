@@ -24,7 +24,8 @@
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
-		"golang.go"
+		"golang.go",
+		"github.copilot"
 	]
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
@@ -36,7 +37,7 @@
 	// Uncomment the next line if you want to keep your containers running after VS Code shuts down.
 	// "shutdownAction": "none",
 
-	"postCreateCommand": 'go install -v github.com/ramya-rao-a/go-outline@latest',
+	"postCreateCommand": "go install -v github.com/ramya-rao-a/go-outline@latest",
 
 	// Uncomment the next line to run commands after the container is created - for example installing curl.
 	// "postCreateCommand": "apt-get update && apt-get install -y curl",

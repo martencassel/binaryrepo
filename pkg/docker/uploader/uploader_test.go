@@ -31,8 +31,21 @@ func TestWriteUpload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	u.WriteFile("123e4567-e89b-12d3-a456-426614174000", []byte("hello"))
-	u.AppendFile("123e4567-e89b-12d3-a456-426614174000", []byte(" world"))
-	u.AppendFile("123e4567-e89b-12d3-a456-426614174000", []byte(" world"))
-	u.AppendFile("123e4567-e89b-12d3-a456-426614174000", []byte(" world"))
+	err = u.WriteFile("123e4567-e89b-12d3-a456-426614174000", []byte("hello"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = u.AppendFile("123e4567-e89b-12d3-a456-426614174000", []byte(" world"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = u.AppendFile("123e4567-e89b-12d3-a456-426614174000", []byte(" world"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = u.AppendFile("123e4567-e89b-12d3-a456-426614174000", []byte(" world"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
 }

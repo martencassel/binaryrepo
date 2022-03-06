@@ -149,7 +149,12 @@ func (registry *DockerRegistry) UploadChunk(rw http.ResponseWriter, req *http.Re
 		rw.Header().Set("Content-Length", "0")
 
 		// Remove the upload
-		registry.uploader.Remove(uuid)
+		err = registry.uploader.Remove(uuid)
+		if err != nil {
+			log.Error().Msg(err.Error())
+			rw.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 
 		rw.WriteHeader(http.StatusCreated)
 		return
@@ -171,7 +176,12 @@ func (registry *DockerRegistry) UploadChunk(rw http.ResponseWriter, req *http.Re
 		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
-	registry.uploader.AppendFile(uuid, body)
+	err = registry.uploader.AppendFile(uuid, body)
+	if err != nil {
+		log.Error().Msg(err.Error())
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	// Test
 	dgst, err := registry.fs.WriteFile(body)

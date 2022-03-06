@@ -55,6 +55,13 @@ var runCmd = &cobra.Command{
 			Type:    repo.Local,
 			PkgType: repo.Docker,
 		})
+		repoIndex.AddRepo(repo.Repo{
+			ID: 3,
+			Name: "docker-group",
+			Group: []string{
+				"docker-local", "docker-remote",
+			},
+		})
 		r := mux.NewRouter()
 		dockerProxy := dockerproxy.NewProxyAppWithOptions(fs, repoIndex)
 		dockerRegistry := dockerregistry.NewDockerRegistry(fs, repoIndex, uploader)
