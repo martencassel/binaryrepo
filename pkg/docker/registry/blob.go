@@ -76,8 +76,6 @@ func IsValidUUID(u string) bool {
 /*
 	Pulling a layer
 
-
-
 	GET /v2/<name>/blobs/<digest>
 */
 func (registry *DockerRegistry) DownloadLayer(rw http.ResponseWriter, req *http.Request) {

@@ -1,79 +1,81 @@
-* Version
-GET /v2/
+--------------------------------
+* Pulling an image
+--------------------------------
+Image := JSON manifest | individual layer files
+Manifest := (image name, tag, fsLayers, signature)
 
-* Pulling images
+1. Retrieve the manifest
+2. Download individual layers using the digests in the manifest
 
-* Pulling an Image Manifest
-GET /v2/<name>/manifests/<reference>
+--------------------------------
+Pull operations
+--------------------------------
+* Pulling the image manifest
+GET /v2/<name>/manifests/<reference>            reference = tag | digest
 
-* Existing Manifests
-HEAD /v2/<name>/manifests/<reference>
+* Existing manifest
+HEAD /v2/<name>/manifests/<reference>           reference = tag | digest
 
-* Pulling a Layer
+* Pulling a layer
 GET /v2/<name>/blobs/<digest>
 
-* Pushing images
+--------------------------------
+* Image pull
+--------------------------------
+1. Assemble the image manifest, then pushing each individual layer
+2. Client uploads the manifest
 
-The client first pushes individual layers, then it will upload the signed image manifest.
+A two step process
+1. Start the upload, returning upload url
+2. Transfer actual data using the upload url
+3. The upload url supports, pushing data and check upload status.
 
-* Pushing an individual layer.
-
-The first request starts the upload, returning a url to carry out the second step.
-The second step uses the upload url to transfer the actual data.
-The url is used to check the upload status. The Location header will indicate the upload location after each request.
-
+--------------------------------
+* Push operations
+--------------------------------
 * Start an upload
-POST /v2/<name>/blobs/uploads
+POST /v2/<name>/blobs/uploads/
 
-* Existing Layers
+* Check existing layers
 HEAD /v2/<name>/blobs/<digest>
 
-* Uploading the Layer
+* Upload the layer
+POST /v2/<name>/blobs/uploads/<uuid>
 
 * Upload Progress
-GET  /v2/<name>/blobs/uploads/<uuid>
+GET /v2/<name>/blobs/uploads/<uuid>
 
 * Monolithic Upload
 PUT /v2/<name>/blobs/uploads/<uuid>?digest=<digest>
-Content-Length: <size of layer>
-Content-Type: application/octet-stream
-<Layer Binary Data>
 
 * Chunked Upload
 PATCH /v2/<name>/blobs/uploads/<uuid>
-Content-Length: <size of chunk>
-Content-Range: <start of range>-<end of range>
-Content-Type: application/octet-stream
-<Layer Chunk Binary Data>
 
 * Completed Upload
-PUT /v2/<name>/blobs/uploads/<uuid>?digest=<digest>
-Content-Length: <size of chunk>
-Content-Range: <start of range>-<end of range>
-Content-Type: application/octet-stream
-<Last Layer Chunk Binary Data>
-Optionally, if all chunks have already been uploaded,
-a PUT request with a digest parameter and zero-length
-body may be sent to complete and validate the upload.
-Multiple “digest” parameters may be provided with different digests.
-The server may verify none or all of them but must
-notify the client if the content is rejected.
-
-201 Created
-Location: /v2/<name>/blobs/<digest>
-Content-Length: 0
-Docker-Content-Digest: <digest>
+PUTH /v2/<name>/blobs/uploads/<uuid>?digest=<digest>
 
 * Cancelling an Upload
-DELETE /v2/<name>/blobs/uploads/<uuid>
+DELETE /v2/<name>/blobs/uploads/<uuid>?digest=<digest>
 
 * Cross Repository Blob Mount
-* Errors
+POST /v2/<name>/blobs/uploads/<uuid>?digest=<digest>&from=<repository name>
+
 * Deleting a Layer
 DELETE /v2/<name>/blobs/<digest>
-202 Accepted
-Content-Length: None
+
 * Pushing an Image Manifest
 PUT /v2/<name>/manifests/<reference>
-Content-Type: <manifest media type>
-...
+
+--------------------------------
+* Other operations
+--------------------------------
+GET /v2/_upload
+GET /v2/<name>/tags/list
+DELETE /v2/<name>/manifests/<reference>
+GET /v2/<name>/tags/list
+
+
+
+
+
+

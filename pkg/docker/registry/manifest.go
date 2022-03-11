@@ -11,6 +11,9 @@ import (
 	log "github.com/rs/zerolog/log"
 )
 
+/*
+	HEAD /v2/<name>/manifests/<reference>		reference = <digest> | <tag>
+*/
 func (registry *DockerRegistry) HasManifest(rw http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("registry.hasManifestHandler %s %s", req.Method, req.URL.Path)
 	vars := mux.Vars(req)
@@ -53,6 +56,9 @@ func (registry *DockerRegistry) HasManifest(rw http.ResponseWriter, req *http.Re
 
 }
 
+/*
+	GET /v2/<name>/manifests/<reference>		reference = <digest> | <tag>
+*/
 func (registry *DockerRegistry) GetManifestHandler(rw http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("registry.getManifest %s %s", req.Method, req.URL.Path)
 	vars := mux.Vars(req)
@@ -104,7 +110,9 @@ func (registry *DockerRegistry) GetManifestHandler(rw http.ResponseWriter, req *
 // PathPutManifest URL.
 const PathPutManifest = "/repo/{repo-name}/v2/{name}/manifests/{reference}"
 
-// Put the manifest identified by name and reference where reference can be a tag or digest.
+/*
+	PUT /v2/<name>/manifests/<reference>		reference = <digest> | <tag>
+*/
 func (registry *DockerRegistry) PutManifest(rw http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("registry.putManifest %s %s", req.Method, req.URL.Path)
 	vars := mux.Vars(req)

@@ -1,0 +1,22 @@
+
+Repository(ID, Name, Type, PkgType, URL, Username, Password, Group, Account, AccessToken)
+
+(1, "helm-remote", "remote", "helm", "http://localhost:8080/binaryrepo/helm-remote", NULL, NULL, NULL, NULL, NULL);
+(2, "docker-remote", "remote", "docker", ...)
+
+Metadata(ID, RepoID, Name, Path, Parent, sha256)
+
+(10, 1, "index.yaml",       NULL, NULL, <sha256-digest>);
+(11, 1, "jenkins-0.1.1.tgz, NULL, NULL, <sha256-digest>);
+
+(100, 2, "redis", NULL, NULL, <sha256-digest>);
+
+<repo>/<namespace>/<tag>
+docker-local/redis/latest
+docker-local/redis/bullseye/manifest.json
+docker-local/redis/bullseye/<layer1>
+docker-local/redis/bullseye/<layer2>
+docker-local/redis/bullseye/<layer3>
+
+
+
