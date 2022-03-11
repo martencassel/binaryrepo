@@ -18,8 +18,8 @@ const PathGetManifest1 = "/repo/{repo-name}/v2/{namespace}/manifests/{reference}
 const PathGetManifest2 = "/repo/{repo-name}/v2/{namespace}/{namespace2}/manifests/{reference}"
 
 /*
-	Check for a manifest
-	GET /v2/<name>/manifests/<digest>
+	Get a manifest
+	GET /v2/<name>/manifests/<reference>
 */
 func (p *DockerProxyApp) GetManifestHandler(rw http.ResponseWriter, req *http.Request) {
 	log.Info().Msgf("proxy.getmanifest %s %s", req.Method, req.URL.Path)
