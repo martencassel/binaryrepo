@@ -11,10 +11,10 @@ Manifest := (image name, tag, fsLayers, signature)
 Pull operations
 --------------------------------
 * Pulling the image manifest
-GET /v2/<name>/manifests/<reference>            reference = tag | digest
+GET /v2/<name>/manifests/<reference>       reference = tag | digest
 
 * Existing manifest
-HEAD /v2/<name>/manifests/<reference>           reference = tag | digest
+HEAD /v2/<name>/manifests/<reference>      reference = tag | digest
 
 * Pulling a layer
 GET /v2/<name>/blobs/<digest>
