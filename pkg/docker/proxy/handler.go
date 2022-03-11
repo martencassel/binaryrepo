@@ -10,6 +10,7 @@ import (
 
 func RegisterHandlers(r *mux.Router, fs *filestore.FileStore, repoIndex *repo.RepoIndex) {
 	////log.Info().Msgf("Registering docker proxy handlers")
+
 	p := NewDockerProxyApp()
 	p.index = repoIndex
 	r.HandleFunc(PathVersionUrl1, p.VersionHandler).Methods(http.MethodGet)

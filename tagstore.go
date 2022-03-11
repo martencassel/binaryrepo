@@ -13,6 +13,7 @@ import "github.com/opencontainers/go-digest"
 
 // Tag store is an interface for a service that manages tags for docker images
 type TagStore interface {
+
 	// Exists checks if a tag exists in the tag store
 	Exists(repo string, digest digest.Digest) bool
 
