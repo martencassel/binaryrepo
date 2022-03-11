@@ -2,6 +2,6 @@ binaryrepo
 .tmp
 .vscode
 local.env
-binaryrepo.log
+*.log
 *.xml
 *.html
