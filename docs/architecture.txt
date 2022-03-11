@@ -1,0 +1,9 @@
+                          Metadata component
+REST API  -------------->
+                          Repository Manager
+
+                                         --> Remote Handler                  Repository Manager
+Repository API     -----> Docker Router  --> Local Handler                   Tag Store
+                                         --> Group Handler                   Upload Manager
+
+
