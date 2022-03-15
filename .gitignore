@@ -5,4 +5,4 @@ local.env
 *.log
 *.xml
 *.html
-./certs
+certs
