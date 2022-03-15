@@ -82,7 +82,7 @@ curl --header "Content-Type: application/json" \
   https://api.binaryrepo.local/api/repository
 ```
 
-If you have a docker hub account, use these credentials,
+If you have a docker hub account, use define using credentials,
 
 ```bash
 curl --header "Content-Type: application/json" \
