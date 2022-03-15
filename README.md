@@ -105,6 +105,7 @@ docker image rmi docker-remote.binaryrepo.local/redis:latest redis:latest
 ```
 
 Then pull again, now from using the binaryrepo server cache,
+this operation will be faster than the previous one (the cache was empty).
 
 ```bash
 time docker image pull docker-remote.binaryrepo.local/redis:latest
