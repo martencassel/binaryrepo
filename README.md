@@ -12,6 +12,7 @@ resused a number of times, reducing network traffic and latency.
 
 * Remote docker repos, ie. caching proxy for remote repos in docker registries
 * Local docker repos.
+* Manage repos using an API (TODO)
 
 ## Demo
 
