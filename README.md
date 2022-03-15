@@ -61,7 +61,7 @@ docker-compose up -d
 
 Create a local docker repository
 ```bash
-curl -v -k --header "Content-Type: application/json" \
+curl -k --header "Content-Type: application/json" \
   --request POST \
   --data '{"name":"docker-local", "repo_type":"local","package_type":"docker"'\
   https://api.binaryrepo.local/api/repo
