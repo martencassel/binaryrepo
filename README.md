@@ -73,11 +73,21 @@ docker image push docker-local.binaryrepo.local/redis:latest
 
 ## Remote docker repository
 
-Create a remote docker repository
+Create a remote docker repository for docker hub,
+
 ```bash
 curl --header "Content-Type: application/json" \
   --request POST \
   --data '{"name":"docker-remote", "repo_type":"remote","package_type":"remote","remote_url":"https://registry-1.docker.io"}' \
+  https://api.binaryrepo.local/api/repository
+```
+
+If you have a docker hub account, use these credentials,
+
+```bash
+curl --header "Content-Type: application/json" \
+  --request POST \
+  --data '{"name":"docker-remote","repo_type":"remote","package_type":"remote","username": "hub-user", "password": "hub-password", remote_url":"https://registry-1.docker.io"}' \
   https://api.binaryrepo.local/api/repository
 ```
 
