@@ -22,13 +22,6 @@ In the demo below, you can see that the the download time of postgres:latest wil
 
 # Getting started
 
-The following example will setup binaryrepo to be used
-as a remote proxy cache of docker hub.
-
-Docker pull command will access the remote repo through a local nginx container.
-
-# Prerequisites
-
 Add a host entry for the reverse proxy:
 ```bash
 127.0.0.1 binaryrepo.example.com docker-local.example.com docker-remote.example.com
