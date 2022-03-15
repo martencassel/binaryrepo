@@ -61,7 +61,7 @@ docker-compose up -d
 
 Create a local docker repository
 ```bash
-curl -k --header "Content-Type: application/json" \
+curl -v -k --header "Content-Type: application/json" \
   --request POST \
   --data '{"name":"docker-local", "repo_type":"local","package_type":"docker"'\
   https://api.binaryrepo.local/api/repo
@@ -79,7 +79,7 @@ docker image push docker-local.binaryrepo.local/redis:latest
 Create a remote docker repository for docker hub,
 
 ```bash
-curl -k --header "Content-Type: application/json" \
+curl -v -k --header "Content-Type: application/json" \
   --request POST \
   --data '{"name":"docker-remote", "repo_type":"remote","package_type":"remote","remote_url":"https://registry-1.docker.io"}' \
   https://api.binaryrepo.local/api/repo
@@ -88,7 +88,7 @@ curl -k --header "Content-Type: application/json" \
 If you have a docker hub account, use define using credentials,
 
 ```bash
-curl -k --header "Content-Type: application/json" \
+curl -v -k --header "Content-Type: application/json" \
   --request POST \
   --data '{"name":"docker-remote","repo_type":"remote","package_type":"remote","username": "hub-user", "password": "hub-password", remote_url":"https://registry-1.docker.io"}' \
   https://api.binaryrepo.local/api/repo

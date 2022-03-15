@@ -64,6 +64,10 @@ setup-certs:
 up:
 	docker-compose up -d
 
+.PHONY: ps
+ps:
+	docker-compose ps
+
 .PHONY: down
 down:
 	docker-compose down

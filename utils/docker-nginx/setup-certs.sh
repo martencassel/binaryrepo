@@ -10,8 +10,9 @@ docker run --rm -v $(pwd)/certs:/certs ehazlett/certm -d /certs \
     ca generate -o=local --overwrite
 
 docker run --rm -v $(pwd)/certs:/certs ehazlett/certm -d /certs \
-    server generate --host docker-remote.example.com \
-                    --host docker-local.example.com \
+    server generate --host docker-remote.binaryrepo.local \
+                    --host docker-local.binaryrepo.local \
+                    --host api.binaryrepo.local \
                     -o=local --overwrite
 
 # Fedora

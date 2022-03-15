@@ -1,9 +1,9 @@
 #!/bin/bash
-#docker image pull docker-local.example.com/alpine:latest
+docker image pull docker-remote.example.com/alpine:latest
 
 #rm -rf /tmp/distribution-spec && cd /tmp && git clone https://github.com/opencontainers/distribution-spec.git && cd distribution-spec/conformance && go test -c
 #go test -c
-export OCI_ROOT_URL=https://docker-local.example.com/repo/docker-local
+export OCI_ROOT_URL=https://docker-remote.binaryrepo.local/repo/docker-remote
 export OCI_TEST_PUSH=0
 export OCI_TEST_PULL=1
 export OCI_TEST_CONTENT_DISCOVERY=0

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export OCI_ROOT_URL=https://docker-local.example.com/
+export OCI_ROOT_URL=https://docker-local.binaryrepo.local/
 export OCI_TEST_PUSH=1
 export OCI_BLOB_DIGEST="sha256:2834dc507516af02784808c5f48b7cbe38b8ed5d0f4837f16e78d00deb7e7767"
 export OCI_BLOB_MANIFEST="sha256:2834dc507516af02784808c5f48b7cbe38b8ed5d0f4837f16e78d00deb7e7767"
