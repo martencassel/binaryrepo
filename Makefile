@@ -13,6 +13,7 @@ golint := $(shell which golangci-lint)
 
 .PHONY: build
 build: lint server
+	docker-compose build
 
 TARGET_OS ?= linux
 
@@ -58,6 +59,19 @@ stop:
 .PHONY: setup-certs
 setup-certs:
 	bash ./utils/docker-nginx/setup-certs.sh
+
+.PHONY: up
+up:
+	docker-compose up -d
+
+.PHONY: down
+down:
+	docker-compose down
+
+.PHONY: logs
+logs:
+	docker-compose logs -f
+
 
 .PHONY: clear-local-images
 clear-local-test-images:
