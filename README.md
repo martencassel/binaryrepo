@@ -77,12 +77,16 @@ Pull an image from the remote docker repo:
 
 ```bash
 docker image rmi docker-remote.binaryrepo.local/redis:latest redis:latest
-
 time docker image pull docker-remote.binaryrepo.local/redis:latest
 ```
 
+Clear the local docker cache,
+
 ```bash
 docker image rmi docker-remote.binaryrepo.local/redis:latest redis:latest
+```
 
+Then pull again, now from the binaryrepo cache
+```bash
 time docker image pull docker-remote.binaryrepo.local/redis:latest
 ```
