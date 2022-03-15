@@ -27,6 +27,11 @@ Add a host entry for the reverse proxy:
 127.0.0.1 binaryrepo.example.com docker-local.example.com docker-remote.example.com
 ```
 
+Create certificates:
+```bash
+make setup-certs
+```
+
 Build:
 ```bash
 docker-compose build
