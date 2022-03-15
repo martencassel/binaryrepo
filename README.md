@@ -86,7 +86,7 @@ Clear the local docker cache,
 docker image rmi docker-remote.binaryrepo.local/redis:latest redis:latest
 ```
 
-Then pull again, now from the binaryrepo cache
+Then pull again, now from using the binaryrepo server cache,
 
 ```bash
 time docker image pull docker-remote.binaryrepo.local/redis:latest
