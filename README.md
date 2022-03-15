@@ -20,71 +20,61 @@ In the demo below, you can see that the the download time of postgres:latest wil
 [![asciicast](https://asciinema.org/a/1bHV8eIiAFO4t2G5Azx8HrqLs.svg)](https://asciinema.org/a/1bHV8eIiAFO4t2G5Azx8HrqLs)
 
 
-## Reverse proxy and docker client
-
-Due to limitations in the docker client, a reverse proxy (nginx) must be
-used in order to proxy images through binaryrepo server.
-
-The flow looks like this:
-
-```bash
-  1. docker image pull docker-remote.example.com sends requests to docker-remote.example.com that points to nginx.
-     nginx listens on localhost:443.
-  2. nginx sends request to binaryrepo at localhost:8081/repo/docker-remote/v2/*
-  3. binaryrepo server authenticates to docker hub and forwards requests to docker hub
-  4. binaryrepo servers receices image layers etc, and saves it to /tmp/filestore/ cache.
-  5. the docker client is finally being served the pulled data.
-```
-## Getting started
+# Getting started
 
 The following example will setup binaryrepo to be used
 as a remote proxy cache of docker hub.
 
 Docker pull command will access the remote repo through a local nginx container.
 
-## Prerequisites
-
-Golang, git and make needs to be installed
-
-Create a self-signed cert and add it to the trust store:
-```bash
-make setup-certs
-ls ~/certs
-# On fedora do this
-sudo cp ./certs/ca.pem /etc/pki/ca-trust/source/anchors/
-sudo update-ca-trust
-```
+# Prerequisites
 
 Add a host entry for the reverse proxy:
 ```bash
-127.0.0.1 docker-remote.example.com
+127.0.0.1 binaryrepo.example.com docker-local.example.com docker-remote.example.com
 ```
 
-Build the binary:
+Build:
 ```bash
-make build
+docker-compose build
 ```
 
-Start nginx
+Start nginx and binaryrepo
 ```bash
-make reverse-proxy
+docker-compose up -d
 ```
 
-Currently binaryrepo only supports accessing docker hub using an hub account.
-It's possible to pull images from docker hub, without an account. But this is not implemented yet.
-
-These environment variables must be set before starting binaryrepo
-
+Create a local docker repository
 ```bash
-export DOCKERHUB_USERNAME=<your username>
-export DOCKERHUB_PASSWORD=<your password>
+curl --header "Content-Type: application/json" \
+  --request POST \
+  --data '{"name":"docker-local", "repo_type":"local","package_type":"docker"'\
+  https://binaryrepo.example.com/api/repository
 ```
 
-Start binaryrepo
+Create a remote docker repository
 ```bash
-make stop
-make start
+curl --header "Content-Type: application/json" \
+  --request POST \
+  --data '{"name":"docker-remote", "repo_type":"remote","package_type":"remote","remote_url":"https://registry-1.docker.io"}' \
+  https://binaryrepo.example.com/api/repository
 ```
+
+Push an image to the local docker repo:
+```bash
+docker image pull redis:latest
+docker image tag redis:latest docker-local.example.com/redis:latest
+docker image push docker-local.example.com/redis:latest
+```
+
+Pull an image from the remote docker repo:
+```bash
+docker image rmi docker-remote.example.com/redis:latest redis:latest
+time docker image pull docker-remote.example.com/redis:latest
+docker image rmi docker-remote.example.com/redis:latest redis:latest
+time docker image pull docker-remote.example.com/redis:latest
+```
+
 ## Code
 
 The docker proxy
