@@ -5,7 +5,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/martencassel/binaryrepo/pkg/api"
+	api "github.com/martencassel/binaryrepo/pkg/api"
+
 	dockerproxy "github.com/martencassel/binaryrepo/pkg/docker/proxy"
 	dockerregistry "github.com/martencassel/binaryrepo/pkg/docker/registry"
 	dockerrouter "github.com/martencassel/binaryrepo/pkg/docker/router"
@@ -64,8 +65,6 @@ var runCmd = &cobra.Command{
 			},
 		})
 
-		apiRouter := api.NewRouter().PathPrefix("/api").Subrouter()
-
 		r := mux.NewRouter()
 		dockerProxy := dockerproxy.NewProxyAppWithOptions(fs, repoIndex)
 		dockerRegistry := dockerregistry.NewDockerRegistry(fs, repoIndex, uploader)
@@ -73,7 +72,7 @@ var runCmd = &cobra.Command{
 		dockerRouter := dockerrouter.NewDockerRouter(dockerProxy, dockerRegistry, repoIndex)
 		dockerRouter.RegisterHandlers(r)
 
-		r.Handle("/api", apiRouter)
+		api.RegisterHandlers(r)
 
 		r.Use(loggingMiddleware)
 		r.PathPrefix("/").HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {

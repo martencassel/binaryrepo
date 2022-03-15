@@ -1,9 +1,13 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 
+	binaryrepo "github.com/martencassel/binaryrepo"
+
 	"github.com/gorilla/mux"
+	"github.com/rs/zerolog/log"
 )
 
 type Route struct {
@@ -13,32 +17,25 @@ type Route struct {
 	HandlerFunc http.HandlerFunc
 }
 
-type Routes []Route
 
-func NewRouter() *mux.Router {
-	router := mux.NewRouter().StrictSlash(true)
-	for _, route := range routes {
-		router.
-			Methods(route.Method).
-			Path(route.Pattern).
-			Name(route.Name).
-			Handler(route.HandlerFunc)
-	}
-	return router
+func RegisterHandlers(r *mux.Router) {
+	r.HandleFunc("/api/repo", createRepo).Methods(http.MethodPost)
+	r.HandleFunc("/api/repo", listRepos).Methods(http.MethodGet)
 }
 
+func createRepo(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("createRepo: %s %s", req.Method, req.URL.Path)
 
-var routes = Routes{
-	Route{
-		"Index",
-		"GET",
-		"/",
-		Index,
-	},
-	Route{
-		"Createrepo",
-		"POST",
-		"/api/repos",
-		CreateRepo,
-	},
+	var repo binaryrepo.Repo
+
+    err := json.NewDecoder(req.Body).Decode(&repo)
+    if err != nil {
+        http.Error(rw, err.Error(), http.StatusBadRequest)
+        return
+    }
+	log.Info().Msgf("%v", repo)
+ }
+
+func listRepos(rw http.ResponseWriter, req *http.Request) {
+	log.Info().Msgf("listRepos: %s %s", req.Method, req.URL.Path)
 }
