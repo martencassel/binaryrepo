@@ -44,19 +44,15 @@ Start nginx and binaryrepo
 docker-compose up -d
 ```
 
+# Usage
+
+## Local docker repository
+
 Create a local docker repository
 ```bash
 curl --header "Content-Type: application/json" \
   --request POST \
   --data '{"name":"docker-local", "repo_type":"local","package_type":"docker"'\
-  https://api.binaryrepo.local/api/repository
-```
-
-Create a remote docker repository
-```bash
-curl --header "Content-Type: application/json" \
-  --request POST \
-  --data '{"name":"docker-remote", "repo_type":"remote","package_type":"remote","remote_url":"https://registry-1.docker.io"}' \
   https://api.binaryrepo.local/api/repository
 ```
 
@@ -67,10 +63,26 @@ docker image tag redis:latest docker-local.binaryrepo.local/redis:latest
 docker image push docker-local.binaryrepo.local/redis:latest
 ```
 
+## Remote docker repository
+
+Create a remote docker repository
+```bash
+curl --header "Content-Type: application/json" \
+  --request POST \
+  --data '{"name":"docker-remote", "repo_type":"remote","package_type":"remote","remote_url":"https://registry-1.docker.io"}' \
+  https://api.binaryrepo.local/api/repository
+```
+
 Pull an image from the remote docker repo:
+
 ```bash
 docker image rmi docker-remote.binaryrepo.local/redis:latest redis:latest
+
 time docker image pull docker-remote.binaryrepo.local/redis:latest
+```
+
+```bash
 docker image rmi docker-remote.binaryrepo.local/redis:latest redis:latest
+
 time docker image pull docker-remote.binaryrepo.local/redis:latest
 ```
