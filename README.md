@@ -10,8 +10,8 @@ By setting up a shared cache on the local network it may serve many users so tha
 resused a number of times, reducing network traffic and latency.
 ## Features
 
-* Proxy caching images from docker hub using a docker hub login
-* The local cache checksum based approach which reduces storage space by storing files only once.
+* Remote docker repos, ie. caching proxy for remote repos in docker registries
+* Local docker repos.
 
 ## Demo
 
