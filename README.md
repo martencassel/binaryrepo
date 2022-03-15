@@ -72,16 +72,3 @@ time docker image pull docker-remote.binaryrepo.local/redis:latest
 docker image rmi docker-remote.binaryrepo.local/redis:latest redis:latest
 time docker image pull docker-remote.binaryrepo.local/redis:latest
 ```
-
-## Code
-
-The docker proxy
-
-https://github.com/martencassel/binaryrepo/tree/main/pkg/docker/proxy
-
-The docker registry client
-
-https://github.com/martencassel/binaryrepo/tree/main/pkg/docker/client
-
-The filestore
-https://github.com/martencassel/binaryrepo/tree/main/pkg/filestore/fs
