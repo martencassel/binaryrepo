@@ -87,6 +87,7 @@ docker image rmi docker-remote.binaryrepo.local/redis:latest redis:latest
 ```
 
 Then pull again, now from the binaryrepo cache
+
 ```bash
 time docker image pull docker-remote.binaryrepo.local/redis:latest
 ```
