@@ -1,7 +1,15 @@
 # About this project
 
-## Problem
+Binaryrepo is a binary repository manager. It can manage binary packages of the following types:
 
+* docker
+
+It supports the following repository types (for docker)
+
+* Remotes
+* Local
+
+## Background (Remotes)
 Performance of package managers (Docker, Helm, Go etc) can be significantly improved by reusing previously fetched resources from the internet to a shared cache server.
 
 Binaryrepo is a shared cache server that store responses to be reused by more than one user.
