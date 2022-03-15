@@ -11,7 +11,7 @@ resused a number of times, reducing network traffic and latency.
 ## Features
 
 * Remote docker repos, ie. caching proxy for remote repos in docker registries
-* Local docker repos.
+* Local docker repos (A Docker Registry v2)
 * Store files using checksums.
 * Manage repos using an API (TODO)
 
