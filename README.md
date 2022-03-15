@@ -24,7 +24,7 @@ In the demo below, you can see that the the download time of postgres:latest wil
 
 Add a host entry for the reverse proxy:
 ```bash
-127.0.0.1 binaryrepo.example.com docker-local.example.com docker-remote.example.com
+127.0.0.1 api.binaryrepo.local docker-local.binaryrepo.local docker-remote.binaryrepo.local
 ```
 
 Create certificates:
@@ -47,7 +47,7 @@ Create a local docker repository
 curl --header "Content-Type: application/json" \
   --request POST \
   --data '{"name":"docker-local", "repo_type":"local","package_type":"docker"'\
-  https://binaryrepo.example.com/api/repository
+  https://api.binaryrepo.local/api/repository
 ```
 
 Create a remote docker repository
@@ -55,22 +55,22 @@ Create a remote docker repository
 curl --header "Content-Type: application/json" \
   --request POST \
   --data '{"name":"docker-remote", "repo_type":"remote","package_type":"remote","remote_url":"https://registry-1.docker.io"}' \
-  https://binaryrepo.example.com/api/repository
+  https://api.binaryrepo.local/api/repository
 ```
 
 Push an image to the local docker repo:
 ```bash
 docker image pull redis:latest
-docker image tag redis:latest docker-local.example.com/redis:latest
-docker image push docker-local.example.com/redis:latest
+docker image tag redis:latest docker-local.binaryrepo.local/redis:latest
+docker image push docker-local.binaryrepo.local/redis:latest
 ```
 
 Pull an image from the remote docker repo:
 ```bash
-docker image rmi docker-remote.example.com/redis:latest redis:latest
-time docker image pull docker-remote.example.com/redis:latest
-docker image rmi docker-remote.example.com/redis:latest redis:latest
-time docker image pull docker-remote.example.com/redis:latest
+docker image rmi docker-remote.binaryrepo.local/redis:latest redis:latest
+time docker image pull docker-remote.binaryrepo.local/redis:latest
+docker image rmi docker-remote.binaryrepo.local/redis:latest redis:latest
+time docker image pull docker-remote.binaryrepo.local/redis:latest
 ```
 
 ## Code
