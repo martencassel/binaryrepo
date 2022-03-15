@@ -43,7 +43,7 @@ cover:
 
 .PHONY: reverse-proxy
 reverse-proxy:
-	bash ./utils/docker-nginx/start-nginx.sh
+	bash ./scripts/docker-nginx/start-nginx.sh
 
 .PHONY: start
 start:  build
@@ -58,7 +58,7 @@ stop:
 
 .PHONY: setup-certs
 setup-certs:
-	bash ./utils/docker-nginx/setup-certs.sh
+	bash ./scripts/docker-nginx/setup-certs.sh
 
 .PHONY: up
 up:
