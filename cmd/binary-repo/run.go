@@ -65,6 +65,7 @@ var runCmd = &cobra.Command{
 		})
 
 		apiRouter := api.NewRouter().PathPrefix("/api").Subrouter()
+
 		r := mux.NewRouter()
 		dockerProxy := dockerproxy.NewProxyAppWithOptions(fs, repoIndex)
 		dockerRegistry := dockerregistry.NewDockerRegistry(fs, repoIndex, uploader)
