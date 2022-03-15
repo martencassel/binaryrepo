@@ -17,7 +17,7 @@ build: lint server
 TARGET_OS ?= linux
 
 binaryrepo: $(GO_SRCS)
-			$(GO) build -o $(BUILD_DIR)/binaryrepo -ldflags "-X github.com/martencassel/binaryrepo/pkg/util/version.V=$(APP_VERSION)" ./cmd/binary-repo
+			CGO_ENABLED=0 $(GO) build -o $(BUILD_DIR)/binaryrepo -ldflags "-X github.com/martencassel/binaryrepo/pkg/util/version.V=$(APP_VERSION)" ./cmd/binary-repo
 
 build.docker-image: docker/Dockerfile
 	docker build --rm \
@@ -76,7 +76,7 @@ BUILD_DIR := build
 .PHONY: server
 server:
 	mkdir -p $(BUILD_DIR)
-	go build -o $(BUILD_DIR)/binaryrepo -ldflags "-X github.com/martencassel/binaryrepo/pkg/util/version.V=$(APP_VERSION)" ./cmd/binary-repo
+	CGO_ENABLED=0 go build -o $(BUILD_DIR)/binaryrepo -ldflags "-X github.com/martencassel/binaryrepo/pkg/util/version.V=$(APP_VERSION)" ./cmd/binary-repo
 
 .PHONY: clean
 clean:
