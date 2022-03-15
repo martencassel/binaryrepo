@@ -10,7 +10,7 @@ It supports the following repository types (for docker)
 * Local
 
 Accessing docker repos from binaryrepo server requires a reverse proxy in front
-of the binaryrepo server. See nginx.conf.
+of the binaryrepo server. See docker-compose.yaml
 
 ## Background (Remotes)
 Performance of package managers (Docker, Helm, Go etc) can be significantly improved by reusing previously fetched resources from the internet to a shared cache server.
