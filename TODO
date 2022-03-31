@@ -1,0 +1,24 @@
+Implement e2e scenario as in README.md
+
+A) Local docker repos
+B) Remote docker repos (anonymous or authenticated access to docker hub)
+C) REST API for managing repos
+
+1. Don't implement chunked upload, only monolithic uploads for local docker repos.
+
+2. Setup postgres with docker compose
+
+3. Setup postgres schema for REST API
+
+4. Implement repo-index component using database
+
+5. Implement REST API repo as in README.md using repo-index database impl.
+
+6. Docker: Anonymous authentication for docker hub (remotes)
+
+7. Docker: Authenticated user for docker hub (remotes)
+
+8. Docker: For remotes with user auth, implement credential caching
+   (Don't auth each request, only first time and when token has expired).
+
+9. Login protected local docker repo
