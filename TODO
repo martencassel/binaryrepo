@@ -22,3 +22,7 @@ C) REST API for managing repos
    (Don't auth each request, only first time and when token has expired).
 
 9. Login protected local docker repo
+
+10. Implement package handler router for all package types...
+
+    Generic package handler router -----------> Package Specific Router ----> Local, Remote or Group Handlers
