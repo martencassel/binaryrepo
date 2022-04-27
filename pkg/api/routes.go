@@ -17,10 +17,9 @@ type Route struct {
 	HandlerFunc http.HandlerFunc
 }
 
-
 func RegisterHandlers(r *mux.Router) {
-	r.HandleFunc("/api/repo", createRepo).Methods(http.MethodPost)
-	r.HandleFunc("/api/repo", listRepos).Methods(http.MethodGet)
+	r.HandleFunc("/repo", createRepo).Methods(http.MethodPost)
+	r.HandleFunc("/repo", listRepos).Methods(http.MethodGet)
 }
 
 func createRepo(rw http.ResponseWriter, req *http.Request) {

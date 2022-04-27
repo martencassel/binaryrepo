@@ -72,9 +72,17 @@ ps:
 down:
 	docker-compose down
 
+.PHONY: db-shell
+db-shell:
+	docker exec -it postgres psql -U postgres
+
 .PHONY: logs
 logs:
 	docker-compose logs -f
+
+.PHONY: clear-docker
+clear-docker:
+	docker rm -f $(docker ps -qa)||true
 
 
 .PHONY: clear-local-images
