@@ -41,6 +41,8 @@ Todo
 * Support helm packaging (remotes, locals)
 * Support generic http file management (remotes, local
 * Support user repository authorization layer (Access control for repositories)
+* Support virtual filesystem based on postgres, that works for multiple package scenarios (package browsing support)
+  and the metadata component.
 
 ## Demo
 
