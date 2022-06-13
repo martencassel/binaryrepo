@@ -39,6 +39,7 @@ Todo
 * Docker Registry V2 input validation (URL parameters etc)
 * Support proxying of docker registries (Remote docker repos)
 * Support helm packaging (remotes, locals)
+* Support alpine packaging (remotes, locals)
 * Support generic http file management (remotes, local
 * Support user repository authorization layer (Access control for repositories)
 * Support virtual filesystem based on postgres, that works for multiple package scenarios (package browsing support)
