@@ -39,6 +39,7 @@ Todo
 * Support proxying of docker registries (Remote docker repos)
 * Support helm packaging (remotes, locals)
 * Support generic http file management (remotes, local
+* Support user repository authorization layer (Access control for repositories)
 
 ## Demo
 
