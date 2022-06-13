@@ -1,48 +1,22 @@
 package dockerproxy
 
 import (
-	"context"
-	"time"
-
-	regclient "github.com/martencassel/binaryrepo/pkg/docker/client"
-	filestore "github.com/martencassel/binaryrepo/pkg/filestore/fs"
-	repo "github.com/martencassel/binaryrepo/pkg/repo"
+	"github.com/martencassel/binaryrepo"
+	"github.com/martencassel/binaryrepo/pkg/docker/client"
 )
 
-type DockerProxyApp struct {
-	fs    *filestore.FileStore
-	index *repo.RepoIndex
+type DockerProxyHandler struct {
+	repoStore binaryrepo.RepoStore
+	fs 		binaryrepo.Filestore
+	registryClient client.RegistryClient
 }
 
-func (*DockerProxyApp) NewRegistryClient(domain, username, password, scope, srvaddr string) (*regclient.Registry, error) {
-	ctx := context.Background()
-	r, err := regclient.New(ctx, regclient.AuthConfig{
-		Username:      username,
-		Password:      password,
-		Scope:         scope,
-		ServerAddress: srvaddr,
-	}, regclient.Opt{
-		Domain:   domain,
-		SkipPing: false,
-		Timeout:  time.Minute * 10,
-		NonSSL:   false,
-		Insecure: false,
-	})
-	return r, err
-}
-
-func NewDockerProxyApp() *DockerProxyApp {
-	p := DockerProxyApp{
-		fs:    filestore.NewFileStore("/tmp/filestore"),
-		index: repo.NewRepoIndex(),
+func NewDockerProxyHandler(repoStore binaryrepo.RepoStore,
+						   fs binaryrepo.Filestore,
+						   registryClient client.RegistryClient) * DockerProxyHandler {
+	return &DockerProxyHandler {
+		repoStore: repoStore,
+		fs: fs,
+		registryClient: registryClient,
 	}
-	return &p
-}
-
-func NewProxyAppWithOptions(fs *filestore.FileStore, index *repo.RepoIndex) *DockerProxyApp {
-	p := DockerProxyApp{
-		fs:    fs,
-		index: index,
-	}
-	return &p
 }

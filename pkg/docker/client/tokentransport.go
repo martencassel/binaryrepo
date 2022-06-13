@@ -39,7 +39,7 @@ func (t *TokenTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return t.authAndRetry(authService, req)
 }
 
-func (r *Registry) Token(ctx context.Context, url string) (string, error) {
+func (r *registryClient) Token(ctx context.Context, url string) (string, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return "", err

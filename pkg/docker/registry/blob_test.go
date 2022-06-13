@@ -1,123 +1,130 @@
-package registry
+package dockerregistry
 
 import (
-	"io/ioutil"
-	"log"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
 
 	"github.com/gorilla/mux"
+	"github.com/opencontainers/go-digest"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/martencassel/binaryrepo/pkg/docker/uploader"
-	filestore "github.com/martencassel/binaryrepo/pkg/filestore/fs"
-	"github.com/martencassel/binaryrepo/pkg/repo"
+	"github.com/stretchr/testify/mock"
 )
 
-func TestBlob(t *testing.T) {
-	// GET /repo/{repo-name}/v2/<name>/blobs/<digest>
-	t.Run("Pull a Layer", func(t *testing.T) {
-		// Arrange
-		os.RemoveAll("/tmp/filestore")
-		uploader := uploader.NewUploadManager("/tmp")
-		fs := filestore.NewFileStore("/tmp/filestore")
-		index := repo.NewRepoIndex()
-		b, err := os.ReadFile("./testdata/7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631.json")
-		if err != nil {
-			t.Fatal(err)
-		}
-		digest, err := fs.WriteFile(b)
-		if err != nil {
-			t.Fatal(err)
-		}
-		log.Println(digest)
-		index.AddRepo(repo.Repo{ID: 1, Name: "test-local", Type: repo.Local, PkgType: repo.Docker})
-		registry := NewDockerRegistry(fs, index, uploader)
-		// Act
-		res := httptest.NewRecorder()
-		vars := map[string]string{
-			"repo-name": "test-local",
-			"name":      "test",
-			"digest":    "sha256:7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631",
-		}
-		req, _ := http.NewRequest(http.MethodHead, "", nil)
-		req = mux.SetURLVars(req, vars)
-		registry.DownloadLayer(res, req)
-		_, err = ioutil.ReadAll(res.Body)
-		if err != nil {
-			t.Fatal(err)
-		}
-		// Assert
-		assert.Equal(t, http.StatusOK, res.Code)
-		assert.Equal(t, "7700", res.Header().Get("Content-Length"))
-		assert.Equal(t, "7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631", res.Header().Get("Docker-Content-Digest"))
-		assert.Contains(t, "registry/2.0", res.Header().Get("docker-distribution-api-version"))
-	})
-	// HEAD /repo/{repo-name}/v2/<name>/blobs/<digest>
+func TestBlobs(t *testing.T) {
+
 	t.Run("Check if blob exists", func(t *testing.T) {
 		// Arrange
-		os.RemoveAll("/tmp/filestore")
-		uploader := uploader.NewUploadManager("/tmp")
-		fs := filestore.NewFileStore("/tmp/filestore")
-		index := repo.NewRepoIndex()
-		b, err := os.ReadFile("./testdata/7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631.json")
-		if err != nil {
-			t.Fatal(err)
-		}
-		digest, err := fs.WriteFile(b)
-		if err != nil {
-			t.Fatal(err)
-		}
-		log.Println(digest)
-		index.AddRepo(repo.Repo{ID: 1, Name: "test-local", Type: repo.Local, PkgType: repo.Docker})
-		registry := NewDockerRegistry(fs, index, uploader)
+		repoName := "docker-local"
+		namespace := "alpine"
+		base_digest := "0c4164589f761881ef975352441e796636759369b39de5fa49bae37126035715"
+		dgst := "sha256:" + base_digest
+
+		digest_, err := digest.Parse(dgst)
+		assert.NoError(t, err)
+
+		// Filestore, Exists
+		fs, rs, tag, uploader := CreateMocks()
+		fs.On("Exists", digest_).Return(true)
+
+		// Filestore, ReadFile
+		b, err := os.ReadFile("./testdata/2408cc74d12b6cd092bb8b516ba7d5e290f485d3eb9672efc00f0583730179e8")
+		assert.NoError(t, err)
+		fs.On("ReadFile", digest_).Return(b, nil)
+
+		// Request
 		req, _ := http.NewRequest(http.MethodHead, "", nil)
-		res := httptest.NewRecorder()
+		req.Header.Add("Content-Length", "0")
+		req.Header.Add("Accept-Encoding", "gzip")
+
 		vars := map[string]string{
-			"repo-name": "test-local",
-			"name":      "test",
-			"digest":    "sha256:7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631",
+			"repo-name": repoName,
+			"namespace": namespace,
+			"digest": 	dgst,
 		}
+		res := httptest.NewRecorder()
 		req = mux.SetURLVars(req, vars)
-		registry.HasLayer(res, req)
-		// Assert
-		assert.Equal(t, http.StatusOK, res.Code)
-		assert.Equal(t, "7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631", res.Header().Get("Docker-Content-Digest"))
-		assert.Contains(t, "registry/2.0", res.Header().Get("docker-distribution-api-version"))
-	})
-	// DELETE /repo/{repo-name}/v2/<name>/blobs/<digest>
-	t.Run("Deleting a Layer", func(t *testing.T) {
-		// Arrange
-		os.RemoveAll("/tmp/filestore")
-		uploader := uploader.NewUploadManager("/tmp")
-		fs := filestore.NewFileStore("/tmp/filestore")
-		index := repo.NewRepoIndex()
-		b, err := os.ReadFile("./testdata/7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631.json")
-		if err != nil {
-			t.Fatal(err)
-		}
-		digest, err := fs.WriteFile(b)
-		if err != nil {
-			t.Fatal(err)
-		}
-		log.Println(digest)
-		index.AddRepo(repo.Repo{ID: 1, Name: "test-local", Type: repo.Local, PkgType: repo.Docker})
+
+		registry := NewDockerRegistryHandler(rs, fs, tag, uploader)
+
 		// Act
-		res := httptest.NewRecorder()
+		registry.ExistingLayer(res, req)
+
+		// Assert
+		assert.Equal(t, "application/octet-stream", res.Header().Get("Content-Type"))
+		assert.Equal(t, "8060", res.Header().Get("Content-Length"))
+		assert.Equal(t, base_digest, res.Header().Get("Docker-Content-Digest"))
+		assert.Equal(t, http.StatusOK, res.Code)
+	})
+
+	t.Run("Get a blob", func(t *testing.T) {
+		// Arrange
+		repoName := "docker-local"
+		namespace := "alpine"
+		base_digest := "2408cc74d12b6cd092bb8b516ba7d5e290f485d3eb9672efc00f0583730179e8"
+		dgst := "sha256:" + base_digest
+		digest_, err := digest.Parse(dgst)
+		assert.NoError(t, err)
+
+		// Mocks
+		fs, rs, _, _ := CreateMocks()
+		rs.On("Exists", mock.Anything, repoName).Return(true, nil)
+		b, err := os.ReadFile(fmt.Sprintf("./testdata/%s", base_digest))
+		assert.NoError(t, err)
+		fs.On("Exists", digest_).Return(true)
+		fs.On("ReadFile", digest_).Return(b, nil)
+
+		// Request, Response
 		vars := map[string]string{
-			"repo-name": "test-local",
-			"name":      "test",
-			"digest":    "sha256:7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631",
+			"repo-name": repoName,
+			"namespace": namespace,
+			"digest": 	dgst,
 		}
 		req, _ := http.NewRequest(http.MethodHead, "", nil)
+		res := httptest.NewRecorder()
 		req = mux.SetURLVars(req, vars)
-		registry := NewDockerRegistry(fs, index, uploader)
-		registry.DeleteLayer(res, req)
+
+		// Handler
+		registry := NewDockerRegistryHandler(rs, fs, nil, nil)
+
+		// Act
+		registry.GetLayer(res, req)
+
 		// Assert
-		assert.Equal(t, http.StatusAccepted, res.Code)
-		assert.Equal(t, "0", res.Header().Get("Content-Length"))
-		assert.Equal(t, "7614ae9453d1d87e740a2056257a6de7135c84037c367e1fffa92ae922784631", res.Header().Get("Docker-Content-Digest"))
+		assert.Equal(t, "application/octet-stream", res.Header().Get("Content-Type"))
+		assert.Equal(t, "8060", res.Header().Get("Content-Length"))
+		assert.Equal(t, base_digest, res.Header().Get("Docker-Content-Digest"))
+		assert.Equal(t, http.StatusOK, res.Code)
+	})
+	t.Run("Delete a blob if it exists", func(t *testing.T) {
+		// Arrange
+		dgst := "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+		digest_, err := digest.Parse(dgst)
+		assert.NoError(t, err)
+		vars := map[string]string{
+			"repo-name": "docker-local",
+			"namespace": "alpine",
+			"digest": 	dgst,
+		}
+		// Request, Response
+		req, _ := http.NewRequest(http.MethodHead, "", nil)
+		res := httptest.NewRecorder()
+		req = mux.SetURLVars(req, vars)
+
+		// Mocks
+		fs, rs, _, _ := CreateMocks()
+		rs.On("Exists", mock.Anything, "docker-local").Return(true, nil)
+		fs.On("Exists", digest_).Return(true)
+		// Handler
+		registry := NewDockerRegistryHandler(rs, fs, nil, nil)
+
+		// Act
+		registry.DeleteLayer(res, req)
+
+		// Assert
+		fs.On("Exists", digest_).Return(false)
+		assert.Equal(t, http.StatusOK, res.Code)
 	})
 }

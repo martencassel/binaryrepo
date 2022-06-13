@@ -1,84 +1,142 @@
-package binaryrepodb
+package postgres
 
 import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
+	"github.com/jackc/pgtype/pgxtype"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/jackc/tern/migrate"
+	"github.com/martencassel/binaryrepo"
+	"github.com/pkg/errors"
 )
 
-const (
-	ConnTimeoutSec = 10
-	MigrationTable = "binaryrepo_schema_migrations"
-)
-
-// Config expected to be used.
-type Config struct {
-	// Database host, required
-	Host string
-	// Database port, required
-	Port int
-	// Database name, required
-	DBName string
-	// Database user, required
-	User string
-	// Database password, required
-	Password string
-	// Limit the open connections in the pool, required
-	MaxOpenConnections int32
-	// Limit on the idle connections in the pool, required
-	MaxIdleConnections int32
-	// Limit on the lifetime of each connection in the pool, required
-	ConnMaxLifetime time.Duration
-	// Automatically create database if it doesn't exist
-	CreateDB bool
-}
-
-// Database provides postgres connection pool
 type Database struct {
-	pool *pgxpool.Pool
+	*pgxpool.Pool
+	name string
+	cfg *binaryrepo.Config
 }
 
-// ConnString build a connection string from Config
-func (c *Config) ConnString() string {
-	return strings.Join(
-		append([]string{
-			fmt.Sprintf("host=%s", c.Host),
-			fmt.Sprintf("port=%d", c.Port),
-			fmt.Sprintf("user=%s", c.User),
-			fmt.Sprintf("password=%s", c.Password),
-			fmt.Sprintf("dbname=%s", c.DBName),
-			fmt.Sprintf("timezone=%s", "utc"),
-			fmt.Sprintf("connect_timeout=%d", ConnTimeoutSec)}), " ")
+func (t *txnSession) doQuery(q sq.SelectBuilder) (pgx.Rows, error) {
+	sqlStr, args, err := q.ToSql()
+	log.Println(sqlStr)
+	if err != nil {
+		return nil, fmt.Errorf("query to sql: %v", err)
+	}
+	return t.Query(t.ctx, sqlStr, args...)
 }
 
-// Open connects to the database and creates the database if it's missing
-func Open(ctx context.Context, cfg Config) (*pgxpool.Pool, error) {
-	if cfg.CreateDB && cfg.DBName != "postgres" {
-		log.Println("Creating database...")
 
-		tempCfg := cfg
-		tempCfg.DBName = "postgres"
-		tempPgPool, err := createPool(ctx, tempCfg)
+func createPool(ctx context.Context, cfg binaryrepo.Config) (*pgxpool.Pool, error) {
+	pgxCfg, err := pgxpool.ParseConfig(cfg.ConnectionString())
+	if err != nil {
+		return nil, err
+	}
+	pgxCfg.MaxConns = cfg.MaxOpenConnections
+	pgxCfg.MaxConns = cfg.MaxIdleConnections
+	pgxCfg.MaxConnLifetime = time.Duration(cfg.ConnMaxLifetime)
+	pool, err := pgxpool.ConnectConfig(ctx, pgxCfg)
+	if err != nil {
+		return nil, err
+	}
+	return pool, nil
+}
+
+func createDBPool(ctx context.Context, cfg binaryrepo.Config) (*pgxpool.Pool, error) {
+	pgxCfg, err := pgxpool.ParseConfig(cfg.ConnectionString())
+	if err != nil {
+		return nil, err
+	}
+	pgxCfg.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
+		log.Printf("Registering types: repotype\n")
+		repoType, err := pgxtype.LoadDataType(ctx, conn, conn.ConnInfo(), "repotype")
+		log.Println(repoType, err)
 		if err != nil {
+			return err
+		}
+		pkgType, err := pgxtype.LoadDataType(ctx, conn, conn.ConnInfo(), "pkgtype")
+		log.Println(pkgType, err)
+		if err != nil {
+			return err
+		}
+		conn.ConnInfo().RegisterDataType(repoType)
+		conn.ConnInfo().RegisterDataType(pkgType)
+		return nil
+	}
+	pgxCfg.MaxConns = cfg.MaxOpenConnections
+	pgxCfg.MaxConns = cfg.MaxIdleConnections
+	pgxCfg.MaxConnLifetime = time.Duration(cfg.ConnMaxLifetime)
+	pool, err := pgxpool.ConnectConfig(ctx, pgxCfg)
+	if err != nil {
+		return nil, err
+	}
+	return pool, nil
+}
+
+func migrateDB(ctx context.Context, pool *pgxpool.Pool) error {
+	pgxPoolConn, err := pool.Acquire(ctx)
+	if err != nil {
+			return errors.Wrap(err, "failed to acquire connection")
+	}
+	defer pgxPoolConn.Release()
+	 var pgxConn *pgx.Conn = pgxPoolConn.Conn()
+	migrator, err := migrate.NewMigrator(ctx, pgxConn, MigrationTable)
+	if err != nil {
+			return errors.Wrap(err, "failed to create migrator")
+	}
+	for _, m := range schemaMigrations {
+			migrator.AppendMigration(m.Name, m.UpSQL, m.DownSQL)
+	}
+	if err := migrator.Migrate(ctx); err != nil {
+			return errors.Wrap(err, "failed to migrate")
+	}
+	return nil
+}
+
+
+func dbCreateStatement(dbName string) string {
+	return fmt.Sprintf("CREATE DATABASE %s", dbName)
+}
+
+func dbExistsQuery(dbName string) string {
+	return fmt.Sprintf("SELECT true FROM pg_database WHERE datname='%s'", dbName)
+}
+
+// Open connects to the database and creates the database if its missing
+func Open(ctx context.Context, cfg binaryrepo.Config) (*Database, error) {
+	db := Database {
+		name: cfg.DBName,
+		cfg: &cfg,
+	}
+	if cfg.CreateDB && cfg.DBName != "postgres" {
+		log.Printf("Creating database: %s", cfg.DBName)
+		tmpCfg := cfg
+		tmpCfg.DBName = "postgres"
+		tmpPg, err := createPool(ctx, tmpCfg)
+		log.Println("After createPool")
+		defer tmpPg.Close()
+		log.Println(tmpPg)
+		if err != nil {
+			log.Println(err)
 			return nil, err
 		}
-		sqlExistsDbQuery := fmt.Sprintf("SELECT true FROM pg_database WHERE datname='%s'", cfg.DBName)
-		log.Println(sqlExistsDbQuery)
-		var databaseExists bool
-		if err := tempPgPool.QueryRow(ctx, sqlExistsDbQuery).Scan(&databaseExists); err != nil {
-			if err != pgx.ErrNoRows {
+		var exists bool
+		if err := tmpPg.QueryRow(ctx, dbExistsQuery(cfg.DBName)).Scan(&exists); err != nil {
+			log.Println(err)
+			if  err != pgx.ErrNoRows {
+				log.Fatalf("Failed to check if database exists: %v", err)
 				return nil, err
 			}
-			sqlCreateDatabaseStmt := fmt.Sprintf("CREATE DATABASE %s", cfg.DBName)
-			_, err := tempPgPool.Exec(ctx, sqlCreateDatabaseStmt)
+			log.Printf("Creating databases with %s", dbCreateStatement(cfg.DBName))
+			log.Printf("%s", dbCreateStatement(cfg.DBName))
+			_, err := tmpPg.Exec(ctx, dbCreateStatement(cfg.DBName))
 			if err != nil {
-				return nil, fmt.Errorf("failed to create postgres database: %s", cfg.DBName)
+				log.Fatalf("Failed to create database: %v", err)
+				return nil, errors.Wrapf(err, "failed to create database: %s", cfg.DBName)
 			}
 		}
 	}
@@ -86,86 +144,51 @@ func Open(ctx context.Context, cfg Config) (*pgxpool.Pool, error) {
 	if err != nil {
 		return nil, err
 	}
+	cfg = *db.cfg
+	err = migrateDB(ctx, pool)
+	if err != nil {
+		log.Fatalf("Failed to migrate database: %v", err)
+		return nil, errors.Wrapf(err, "failed to migrate database: %s", cfg.DBName)
+	}
 
-	if err := migrateDB(ctx, pool); err != nil {
+	dbPool, err := createDBPool(ctx, cfg)
+	if err != nil {
 		return nil, err
 	}
 
-	return pool, nil
+	db.Pool = dbPool
+	return &db, nil
 }
 
-// OpenOrFail connects to the database and creates the database if it's missing,
-// it throws an fatal error on failure
-func OpenOrFail(ctx context.Context, cfg Config) (*pgxpool.Pool) {
-	pg, err := Open(ctx, cfg)
+func InsertData(pool *pgxpool.Pool, name string, email string) {
+	ctx := context.Background()
+	_, err := pool.Exec(ctx, "INSERT INTO users (name, email, password) VALUES ($1, $2, $3)", name, email, "password")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to insert row: %v", err)
 	}
-	return pg
 }
 
-// createPool creates a postgres connection pool for a given configuration
-func createPool(ctx context.Context, cfg Config) (*pgxpool.Pool, error) {
-		// Create pool
-		pgxCfg, err := pgxpool.ParseConfig(cfg.ConnString())
-		if err != nil {
-			return nil, err
+func QueryData(pool *pgxpool.Pool) {
+	ctx := context.Background()
+	rows, err := pool.Query(ctx, "SELECT email FROM users")
+	if err != nil {
+		log.Fatalf("Failed to execute query: %v", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var email string
+		if err := rows.Scan(&email); err != nil {
+			log.Fatalf("Failed to scan row: %v", err)
 		}
-		pgxCfg.MaxConns = cfg.MaxOpenConnections
-		pgxCfg.MinConns = cfg.MaxIdleConnections
-		pgxCfg.MaxConnLifetime = cfg.ConnMaxLifetime
-
-		pool, err := pgxpool.ConnectConfig(ctx, pgxCfg)
-		if err != nil {
-			return nil, err
-		}
-		return pool, nil
+		fmt.Printf("Email: %s\n", email)
+	}
+	var email string
+	pool.QueryRow(ctx, "SELECT email FROM users WHERE id = $1", 6).Scan(&email)
+	fmt.Printf("Email for id = 1 is Email: %s\n", email)
 }
 
-func migrateDB(ctx context.Context, pool *pgxpool.Pool) error {
-	pgxconn, err := pool.Acquire(ctx)
-	if err != nil {
-		return err
-	}
-	defer pgxconn.Release()
-	migrator, err := newMigrator(ctx, pgxconn.Conn())
-	if err != nil {
-		return err
-	}
-	if err := migrator.Migrate(ctx); err != nil {
-		return fmt.Errorf("failed to migrate database: %s", err)
-	}
-	return nil
+
+
+func build() sq.StatementBuilderType {
+	return sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 }
-
-func newMigrator(ctx context.Context, conn *pgx.Conn) (*migrate.Migrator, error) {
-	migrator, err := migrate.NewMigrator(ctx, conn, MigrationTable)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create migrator: %s", err)
-	}
-	for _, m := range schemaMigrations {
-		migrator.AppendMigration(m.Name, m.UpSQL, m.DownSQL)
-	}
-	return migrator, nil
-}
-
-/*	ctx := context.Background()
-	cfg := Config{
-		Host: "localhost",
-		Port: 5432,
-		DBName: "binaryrepo",
-		User: "postgres",
-		Password: "postgres",
-		MaxOpenConnections: 10,
-		MaxIdleConnections: 10,
-		ConnMaxLifetime: time.Hour,
-		CreateDB: true,
-	}
-	pool, err  := Open(ctx, cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer pool.Close()
-	log.Println(pool)
-*/
-

@@ -9,3 +9,14 @@ type AuthConfig struct {
 	RegistryToken string
 	ServerAddress string
 }
+
+/*
+	Set registry client config
+*/
+func (r *registryClient) SetConfig(url string, domain string, config *AuthConfig) {
+	r.Username = config.Username
+	r.Password = config.Password
+	r.Scope = config.Scope
+	r.URL = url
+	r.Domain = domain
+}

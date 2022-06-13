@@ -5,16 +5,19 @@ import (
 	"io/ioutil"
 	"os"
 
+	binaryrepo "github.com/martencassel/binaryrepo"
 	digest "github.com/opencontainers/go-digest"
 	log "github.com/rs/zerolog/log"
 )
 
-type FileStore struct {
+//var _ FileStore = &fileStore{}
+
+type fileStore struct {
 	BasePath string
 }
 
-func NewFileStore(basePath string) *FileStore {
-	fs := &FileStore{
+func NewFileStore(basePath string) binaryrepo.Filestore {
+	fs := fileStore{
 		BasePath: basePath,
 	}
 	err := os.MkdirAll(basePath, 0755)
@@ -25,7 +28,11 @@ func NewFileStore(basePath string) *FileStore {
 	if err != nil {
 		log.Fatal().Msg(err.Error())
 	}
-	return fs
+	return &fs
+}
+
+func (fs *fileStore) GetBasePath() string {
+	return fs.BasePath
 }
 
 func getFilePath(basePath string, digest digest.Digest) (string, string, string) {
@@ -39,7 +46,7 @@ func getFilePath(basePath string, digest digest.Digest) (string, string, string)
 	return filePath, folderPath, fileName
 }
 
-func (fs *FileStore) Remove(digest digest.Digest) error {
+func (fs *fileStore) Remove(digest digest.Digest) error {
 	if !fs.Exists(digest) {
 		return nil
 	}
@@ -52,13 +59,13 @@ func (fs *FileStore) Remove(digest digest.Digest) error {
 	return nil
 }
 
-func (fs *FileStore) Exists(digest digest.Digest) bool {
+func (fs *fileStore) Exists(digest digest.Digest) bool {
 	filePath, _, _ := getFilePath(fs.BasePath, digest)
 	_, err := os.Stat(filePath)
 	return err == nil
 }
 
-func (fs *FileStore) WriteFile(b []byte) (digest.Digest, error) {
+func (fs *fileStore) WriteFile(b []byte) (digest.Digest, error) {
 	digest := digest.FromBytes(b)
 	filePath, folderPath, _ := getFilePath(fs.BasePath, digest)
 	err := os.MkdirAll(folderPath, 0755)
@@ -74,7 +81,7 @@ func (fs *FileStore) WriteFile(b []byte) (digest.Digest, error) {
 	return digest, nil
 }
 
-func (fs *FileStore) ReadFile(digest digest.Digest) ([]byte, error) {
+func (fs *fileStore) ReadFile(digest digest.Digest) ([]byte, error) {
 	if !fs.Exists(digest) {
 		return nil, nil
 	}

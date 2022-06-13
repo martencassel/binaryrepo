@@ -1,24 +1,24 @@
-package registry
+package dockerregistry
 
 import (
-	tagstore "github.com/martencassel/binaryrepo/pkg/docker/tagstore"
-	"github.com/martencassel/binaryrepo/pkg/docker/uploader"
-	filestore "github.com/martencassel/binaryrepo/pkg/filestore/fs"
-	"github.com/martencassel/binaryrepo/pkg/repo"
+	binaryrepo "github.com/martencassel/binaryrepo"
 )
 
-type DockerRegistry struct {
-	fs       *filestore.FileStore
-	index    *repo.RepoIndex
-	tagstore *tagstore.TagStore
-	uploader *uploader.UploadManager
+type DockerRegistryHandler struct {
+	rs binaryrepo.RepoStore
+	fs 		binaryrepo.Filestore
+	ts binaryrepo.TagStore
+	uploader binaryrepo.Uploader
 }
 
-func NewDockerRegistry(fs *filestore.FileStore, index *repo.RepoIndex, uploader *uploader.UploadManager) *DockerRegistry {
-	registry := &DockerRegistry{}
-	registry.fs = fs
-	registry.index = index
-	registry.tagstore = tagstore.NewTagStore("/tmp/tagstore")
-	registry.uploader = uploader
-	return registry
+func NewDockerRegistryHandler(rs binaryrepo.RepoStore,
+						      fs binaryrepo.Filestore,
+							  ts binaryrepo.TagStore,
+							  uploader binaryrepo.Uploader) * DockerRegistryHandler {
+	return &DockerRegistryHandler {
+		rs: rs,
+		fs: fs,
+		ts: ts,
+		uploader: uploader,
+	}
 }

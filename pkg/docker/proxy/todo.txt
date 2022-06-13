@@ -1,0 +1,52 @@
+Remote docker repo
+
+Base:
+    1. Check if repo exists
+    2. Load repository settings
+    3. Create reg client with those settings
+
+GET /v2/ with basic auth
+    Check if the repository is a public or anonymous (require no authentication), if so then let any request in
+    Otherwise check access for principal, if the principal has the rights to perform the operation,
+    grant access, otherwise deny access. Lookup principal in principal-permission table (operation, repository)
+
+HEAD,
+/v2/{namespace}/manifests/{reference}
+    1. Perform a head request to remote
+
+
+GET
+/v2/{namespace}/manifests/{reference}
+    1. Query remote manifest using a HEAD
+    2. Using e-tag check if we have this manifest locally
+       If so, then fetch the manifest from the filestore,
+       Service this manifest from cache
+    3. Otherwise, the e-tag is new in remote,
+       we must update the local cache.
+    4. Fetch the remote manifest, and its e-tag
+    5. Store manifest in filestore
+    6. Store e-tag and metadata about the manifest
+    7. Serve the manifest to client
+
+HEAD,
+/v2/{namespace}/blobs/{digest}
+    1. Perform a head request to remote
+
+GET
+/v2/{namespace}/blobs/{digest}
+    1. Query remote manifest using a HEAD
+    2. Using e-tag check if we have this manifest locally
+       If so, then fetch the manifest from the filestore,
+       Service this manifest from cache
+
+       If the remote supports e-tags:
+        3. Otherwise, the e-tag is new in remote,
+        we must update the local cache.
+        4. Fetch the remote blob, and its e-tag
+        5. Store manifest in filestore
+        6. Store e-tag and metadata about the manifest
+        7. Serve the manifest to client
+       If not supporting e-tags
+        Perform a HEAD request to see if this digest exists in remote,
+        if so then fetch if not found in local cache
+        Otherwise serve directly from local cache

@@ -6,10 +6,10 @@ import (
 	"net/http"
 
 	"github.com/docker/distribution/manifest/schema2"
-	"github.com/opencontainers/go-digest"
+	digest "github.com/opencontainers/go-digest"
 )
 
-func (r *Registry) Digest(ctx context.Context, image Image) (digest.Digest, *http.Response, error) {
+func (r *registryClient) Digest(ctx context.Context, image Image) (digest.Digest, *http.Response, error) {
 	if len(image.Digest) > 1 {
 		return image.Digest, nil, nil
 	}

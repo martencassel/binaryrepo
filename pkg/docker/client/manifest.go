@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 
 	log "github.com/rs/zerolog/log"
 
@@ -19,8 +20,10 @@ var (
 	ErrUnexpectedSchemaVersion = errors.New("recieved a different schema version than expected")
 )
 
+//
+
 // Manifest returns the manifest for a specific repository:tag.
-func (r *Registry) Manifest(ctx context.Context, repository, ref string) (distribution.Manifest, error) {
+func (r *registryClient) Manifest(ctx context.Context, repository, ref string) (distribution.Manifest, error) {
 	uri := r.url("/v2/%s/manifests/%s", repository, ref)
 	log.Printf("registry.manifests uri=%s repository=%s ref=%s", uri, repository, ref)
 	req, err := http.NewRequest("GET", uri, nil)
@@ -46,7 +49,7 @@ func (r *Registry) Manifest(ctx context.Context, repository, ref string) (distri
 }
 
 // ManifestList gets the registry v2 manifest list.
-func (r *Registry) ManifestList(ctx context.Context, repository, ref string) (manifestlist.ManifestList, error) {
+func (r *registryClient) ManifestList(ctx context.Context, repository, ref string) (manifestlist.ManifestList, error) {
 	uri := r.url("/v2/%s/manifests/%s", repository, ref)
 	log.Printf("registry.manifests uri=%s repository=%s ref=%s", uri, repository, ref)
 	var m manifestlist.ManifestList
@@ -59,7 +62,7 @@ func (r *Registry) ManifestList(ctx context.Context, repository, ref string) (ma
 }
 
 // ManifestV2 gets the registry v2 manifest.
-func (r *Registry) ManifestV2(ctx context.Context, repository, ref string) (schema2.Manifest, error) {
+func (r *registryClient) ManifestV2(ctx context.Context, repository, ref string) (schema2.Manifest, error) {
 	uri := r.url("/v2/%s/manifests/%s", repository, ref)
 	////log.Info().Msgf("registry.manifests uri=%s repository=%s ref=%s", uri, repository, ref)
 	var m schema2.Manifest
@@ -74,7 +77,7 @@ func (r *Registry) ManifestV2(ctx context.Context, repository, ref string) (sche
 }
 
 // ManifestV1 gets the registry v1 manifest.
-func (r *Registry) ManifestV1(ctx context.Context, repository, ref string) (schema1.SignedManifest, error) {
+func (r *registryClient) ManifestV1(ctx context.Context, repository, ref string) (schema1.SignedManifest, error) {
 	uri := r.url("/v2/%s/manifests/%s", repository, ref)
 	////log.Info().Msgf("registry.manifests uri=%s repository=%s ref=%s", uri, repository, ref)
 	var m schema1.SignedManifest
@@ -86,4 +89,31 @@ func (r *Registry) ManifestV1(ctx context.Context, repository, ref string) (sche
 		return m, ErrUnexpectedSchemaVersion
 	}
 	return m, nil
+}
+
+// HasManifest returns if the registry contains the specific manifest
+func (r *registryClient) HasManifest(ctx context.Context, repository string, ref string) (bool, *http.Response, error) {
+	checkURL := r.url("/v2/%s/manifests/%s", repository, ref)
+	log.Info().Msgf("registry.manifest.check url=%s repository=%s ref=%s", checkURL, repository, ref)
+	req, err := http.NewRequest("HEAD", checkURL, nil)
+	if err != nil {
+		return false, nil, err
+	}
+	resp, err := r.Client.Do(req.WithContext(ctx))
+	if err == nil {
+		//defer resp.Body.Close()
+		return resp.StatusCode == http.StatusOK, resp, nil
+	}
+	urlErr, ok := err.(*url.Error)
+	if !ok {
+		return false, resp, err
+	}
+	httpErr, ok := urlErr.Err.(*httpStatusError)
+	if !ok {
+		return false, resp, err
+	}
+	if httpErr.Response.StatusCode == http.StatusNotFound {
+		return false, resp, nil
+	}
+	return false, resp, err
 }

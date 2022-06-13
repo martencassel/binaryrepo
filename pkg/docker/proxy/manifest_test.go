@@ -1,129 +1,61 @@
 package dockerproxy
 
 import (
-	"net/http"
-	"net/http/httptest"
 	"os"
+	"context"
+	"log"
 	"testing"
 
-	"github.com/gorilla/mux"
-	repo "github.com/martencassel/binaryrepo/pkg/repo"
+	client "github.com/martencassel/binaryrepo/pkg/docker/client"
 	"github.com/stretchr/testify/assert"
 )
 
-// GET	 /v2/<name>/manifests/<reference>
-func TestGetManifest(t *testing.T) {
-
-	t.Run("Fetch a manifest", func(t *testing.T) {
-		os.RemoveAll("/tmp/filestore")
-
-		req, err := http.NewRequest("GET", "http://localhost:8081/repo/docker-remote/v2/redis/manifests/latest", nil)
-		if err != nil {
-			t.Fatal(err)
-		}
-		rec := httptest.NewRecorder()
-		p := NewDockerProxyApp()
-		hubUser := os.Getenv("DOCKERHUB_USERNAME")
-		hubPass := os.Getenv("DOCKERHUB_PASSWORD")
-		p.index.AddRepo(repo.Repo{
-			ID:       1,
-			Name:     "docker-remote",
-			Type:     repo.Remote,
-			PkgType:  repo.Docker,
-			URL:      "https://registry-1.docker.io",
-			Username: hubUser,
-			Password: hubPass,
-		})
-		vars := map[string]string{
-			"repo-name":  "docker-remote",
-			"namespace":  "redis",
-			"namespace1": "",
-			"namespace2": "",
-			"reference":  "latest",
-		}
-		req = mux.SetURLVars(req, vars)
-		p.GetManifestHandler(rec, req)
-		res := rec.Result()
-		if res.StatusCode != http.StatusOK {
-			t.Errorf("Status code is not OK: %d", res.StatusCode)
-		}
-		assert.Equal(t, "1573", res.Header.Get("Content-Length"))
-		assert.Equal(t, "application/vnd.docker.distribution.manifest.v2+json", res.Header.Get("Content-Type"))
-		assert.Equal(t, "sha256:03f00cd789243846888e2f834c762f53b224b9970b434a192b0f6b533d7e219c", res.Header.Get("docker-content-digest"))
-		assert.Equal(t, "registry/2.0", res.Header.Get("Docker-Distribution-Api-Version"))
-		assert.Equal(t, "\"sha256:03f00cd789243846888e2f834c762f53b224b9970b434a192b0f6b533d7e219c\"", res.Header.Get("Etag"))
-	})
-
-}
-
 // HEAD /v2/<name>/manifests/<reference>
-func TestManifestExists(t *testing.T) {
-
-	t.Run("Test 2", func(t *testing.T) {
-		req, err := http.NewRequest("HEAD", "http://localhost:8081/repo/docker-remote/v2/redis/manifests/latest", nil)
-		if err != nil {
-			t.Fatal(err)
+func TestHeadManifest(t *testing.T) {
+	t.Run("Check if upstream manifests exists", func(t *testing.T) {
+		ctx := context.Background()
+    	        hubUser := os.Getenv("DOCKERHUB_USERNAME")
+                hubPass := os.Getenv("DOCKERHUB_PASSWORD")
+		opt := client.Opt{
+			Domain:   "docker.io",
+			SkipPing: false,
+			Timeout:  0,
+			NonSSL:   false,
+			Insecure: false,
+			Debug:    false,
+			Headers:  nil,
 		}
-		rec := httptest.NewRecorder()
-		p := NewDockerProxyApp()
-		hubUser := os.Getenv("DOCKERHUB_USERNAME")
-		hubPass := os.Getenv("DOCKERHUB_PASSWORD")
-		p.index.AddRepo(repo.Repo{
-			ID:       1,
-			Name:     "docker-remote",
-			Type:     repo.Remote,
-			PkgType:  repo.Docker,
-			URL:      "https://registry-1.docker.io",
+		config := &client.AuthConfig{
 			Username: hubUser,
 			Password: hubPass,
-		})
-		vars := map[string]string{
-			"repo-name":  "docker-remote",
-			"namespace":  "redis",
-			"namespace1": "",
-			"namespace2": "",
-			"reference":  "latest",
 		}
-		req = mux.SetURLVars(req, vars)
-		p.HasManifest(rec, req)
-		res := rec.Result()
-		if res.StatusCode != http.StatusOK {
-			t.Errorf("Status code is not OK: %d", res.StatusCode)
-		}
-		assert.Equal(t, "application/vnd.docker.distribution.manifest.v2+json", res.Header.Get("Content-Type"))
-		assert.Equal(t, "sha256:03f00cd789243846888e2f834c762f53b224b9970b434a192b0f6b533d7e219c", res.Header.Get("docker-content-digest"))
-		assert.Equal(t, "registry/2.0", res.Header.Get("Docker-Distribution-Api-Version"))
-		assert.Equal(t, "\"sha256:03f00cd789243846888e2f834c762f53b224b9970b434a192b0f6b533d7e219c\"", res.Header.Get("Etag"))
-	})
-
-	t.Run("Test 3", func(t *testing.T) {
-		req, err := http.NewRequest("HEAD", "http://localhost:8081/repo/docker-remote/v2/redis/manifests/latest", nil)
+		client, err := client.New(ctx, *config, opt)
 		if err != nil {
-			t.Fatal(err)
+			t.Errorf("New error: %s", err)
 		}
-		rec := httptest.NewRecorder()
-		p := NewDockerProxyApp()
-		hubUser := os.Getenv("DOCKERHUB_USERNAME")
-		hubPass := os.Getenv("DOCKERHUB_PASSWORD")
-		p.index.AddRepo(repo.Repo{
-			ID:       1,
-			Name:     "docker-remote",
-			Type:     repo.Remote,
-			PkgType:  repo.Docker,
-			URL:      "https://registry-1.docker.io",
-			Username: hubUser,
-			Password: hubPass,
-		})
-		vars := map[string]string{
-			"repo-name":  "not-found",
-			"namespace":  "redis",
-			"namespace1": "",
-			"namespace2": "",
-			"reference":  "latest",
+		client.SetConfig("https://registry-1.docker.io", "docker.io", config)
+		err = client.Ping(ctx)
+		if err != nil {
+			t.Errorf("Ping error: %s", err)
 		}
-		req = mux.SetURLVars(req, vars)
-		p.GetManifestHandler(rec, req)
-		res := rec.Result()
-		assert.Equal(t, http.StatusNotFound, res.StatusCode)
+		exists, resp, err := client.HasManifest(ctx, "library/alpine", "latest")
+		if err != nil {
+			t.Errorf("HasManifest error: %s", err)
+		}
+		assert.True(t, exists, "found known manifest by ref as tag")
+		assert.NotNil(t, resp)
+		etag := resp.Header.Get("Etag")
+		assert.NotNil(t, etag)
+		log.Println(etag)
+
+		exists, resp, err = client.HasManifest(ctx, "library/alpine", "sha256:686d8c9dfa6f3ccfc8230bc3178d23f84eeaf7e457f36f271ab1acc53015037c")
+		etag = resp.Header.Get("Etag")
+		t.Log(etag)
+		assert.NotNil(t, resp)
+		if err != nil {
+			t.Errorf("HasManifest error: %s", err)
+		}
+		assert.NotNil(t, etag)
+		assert.True(t, exists, "found known manifest by ref as tag ")
 	})
 }

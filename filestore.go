@@ -5,6 +5,8 @@ import "github.com/opencontainers/go-digest"
 // Filestore is an interface for a service that stores binary blobs.
 type Filestore interface {
 
+	GetBasePath() string
+
 	// Exists checks if a binary blob exists in the filestore.
 	Exists(digest digest.Digest) bool
 

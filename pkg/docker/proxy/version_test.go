@@ -6,8 +6,10 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-	repo "github.com/martencassel/binaryrepo/pkg/repo"
+	"github.com/martencassel/binaryrepo"
+	"github.com/martencassel/binaryrepo/pkg/mocks"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestVersionHandler(t *testing.T) {
@@ -16,14 +18,11 @@ func TestVersionHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 	rec := httptest.NewRecorder()
-	p := NewDockerProxyApp()
-	p.index.AddRepo(repo.Repo{
-		ID:      1,
-		Name:    "docker-remote",
-		Type:    repo.Remote,
-		PkgType: repo.Docker,
-		URL:     "https://registry-1.docker.io",
-	})
+	rs := mocks.NewRepoStoreMock()
+	fs := mocks.NewFileStoreMock()
+	regClient := mocks.NewRegistryClientMock()
+	rs.On("Get", mock.Anything, "docker-remote").Return(&binaryrepo.Repo{ Name: "docker-remote", Repotype: "remote", Pkgtype: "docker", Remoteurl: "https://registry-1.docker.io", Anonymous: false })
+	p := NewDockerProxyHandler(rs, fs, regClient)
 	vars := map[string]string{
 		"repo-name": "docker-remote",
 	}

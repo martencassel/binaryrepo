@@ -17,14 +17,12 @@ const (
 )
 
 type Repo struct {
-	ID          int	`json:"id"`
-	Name        string `json:"name"`
-	Type        RepoType `json:"repo_type"`
-	PkgType     PkgType `json:"package_type"`
-	URL         string `json:"remote_url"`
-	Username    string `json:"username"`
-	Password    string `json:"password"`
-	Group       []string `json:"group"`
-	Account     string `json:"account"`
-	AccessToken string `json:"access_token"`
+	ID 			   int	  `json:"id"`
+	Name 	 	   string `json:"name"`
+	Repotype 	   string `json:"repo_type"`
+	Pkgtype   	   string `json:"pkg_type"`
+	Remoteurl      string `json:"remote_url"`
+	RemoteUsername string `json:"remote_username"`
+	RemotePassword string `json:"remote_password"`
+	Anonymous      bool `json:"anonymous"`
 }

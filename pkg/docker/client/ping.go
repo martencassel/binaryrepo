@@ -6,11 +6,11 @@ import (
 	"strings"
 )
 
-func (r *Registry) Pingable() bool {
+func (r *registryClient) Pingable() bool {
 	return !strings.HasSuffix(r.URL, "gcr.io")
 }
 
-func (r *Registry) Ping(ctx context.Context) error {
+func (r *registryClient) Ping(ctx context.Context) error {
 	url := r.url("/v2/")
 	req, err := http.NewRequest("GET", url, nil)
 	////log.Info().Msgf("registry.ping url=%s", url)

@@ -15,11 +15,11 @@ func TestFileStore(t *testing.T) {
 	t.Run("Create filestore at base directory", func(t *testing.T) {
 		os.RemoveAll("/tmp/filestore")
 		fs := NewFileStore("/tmp/filestore")
-		_, err := os.Stat(fs.BasePath)
+		_, err := os.Stat(fs.GetBasePath())
 		if err != nil {
 			t.Fatal(err)
 		}
-		_, err = os.Stat(fs.BasePath + "/uploads")
+		_, err = os.Stat(fs.GetBasePath() + "/uploads")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -86,7 +86,7 @@ func TestFileStore(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		filePath, folderPath, fileName := getFilePath(fs.BasePath, digest)
+		filePath, folderPath, fileName := getFilePath(fs.GetBasePath(), digest)
 		assert.Equal(t, "/tmp/filestore/56/704d8d370580ad16fcfbf725982551da20fb82b4450f9aedfd055fa9857967", filePath)
 		assert.Equal(t, "/tmp/filestore/56", folderPath)
 		assert.Equal(t, "704d8d370580ad16fcfbf725982551da20fb82b4450f9aedfd055fa9857967", fileName)
