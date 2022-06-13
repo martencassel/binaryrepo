@@ -1,0 +1,25 @@
+/upload/{upload-uid}
+
+* HEAD /repo/blobs/<digest>
+* POST /uploads
+Create upload folder for docker-local repo. Path: docker-local/_upload
+Return upload id (uuid) return to client. Save upload as a tag to the upload folder: docker-local/_upload
+* PATCH /uploads/<uuid>
+Write uploaded file to docker-local/_upload/<uuid>
+* PUT /uploads/<uuid>?digest=<digest>
+
+----------------------
+
+Create _upload folder for docker-local repo.
+
+DELETE FROM artifact_node;
+INSERT INTO repo (name, repotype, pkgtype) VALUES ('docker-local', 'local', 'docker');
+INSERT INTO artifact_node (repo_id, name, path, is_folder) VALUES ((SELECT id FROM repo WHERE name = 'docker-local'), '_uploads', '/_uploads', true);
+INSERT INTO artifact_node (repo_id, name, path, is_folder, checksum, parent_id) VALUES ((SELECT id FROM repo WHERE name = 'docker-local'), '958f55ac-d91a-11ec-8ed2-0242c0a83003', '/_uploads/958f55ac-d91a-11ec-8ed2-0242c0a83003', false, 'sha256:5431a46e8ed5f1dfc7d6842818d238b9318fa086b1eff7cc619a9756d1c33210', (SELECT id FROM artifact_node WHERE path = '/_uploads'));
+
+
+
+, password) VALUES ('admin', (SELECT crypt('admin',gen_salt('bf')) ));
+
+
+INSERT artifact_node

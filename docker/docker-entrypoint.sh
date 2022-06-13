@@ -2,3 +2,4 @@
 set -Eeuo pipefail
 
 exec "$@"
+

@@ -20,10 +20,9 @@ TARGET_OS ?= linux
 binaryrepo: $(GO_SRCS)
 			CGO_ENABLED=0 $(GO) build -o $(BUILD_DIR)/binaryrepo -ldflags "-X github.com/martencassel/binaryrepo/pkg/util/version.V=$(APP_VERSION)" ./cmd/binary-repo
 
-build.docker-image: docker/Dockerfile
-	docker build --rm \
-		--build-arg BUILDIMAGE=golang:$(go_version)-alpine \
-		-t binaryrepo:latest -f docker/Dockerfile .
+.PHONY: build.docker-image
+build.docker-image:
+	docker build -t binaryrepo:latest -f ./docker/Dockerfile .
 
 .PHONY: check-remote-pull
 check-remote-pull: build reverse-proxy start
@@ -62,19 +61,19 @@ setup-certs:
 
 .PHONY: up
 up:
-	docker-compose up -d
+	docker-compose -f ./docker-compose.dev.yml up -d --remove-orphans
 
 .PHONY: ps
 ps:
-	docker-compose ps
+	docker-compose -f ./docker-compose.dev.yml ps
 
 .PHONY: down
 down:
-	docker-compose down
+	docker-compose -f ./docker-compose.dev.yml down
 
 .PHONY: db-shell
 db-shell:
-	docker exec -it postgres psql -U postgres
+	docker exec -it binaryrepo-postgres psql -U postgres
 
 .PHONY: logs
 logs:
@@ -100,7 +99,7 @@ clear-filestore:
 BUILD_DIR := build
 
 .PHONY: server
-server:
+server: clean
 	mkdir -p $(BUILD_DIR)
 	CGO_ENABLED=0 go build -o $(BUILD_DIR)/binaryrepo -ldflags "-X github.com/martencassel/binaryrepo/pkg/util/version.V=$(APP_VERSION)" ./cmd/binary-repo
 

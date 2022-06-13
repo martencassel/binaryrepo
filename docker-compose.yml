@@ -2,37 +2,42 @@ version: '3.9'
 
 services:
 
+  binaryrepo:
+    container_name: binaryrepo
+    image: binaryrepo:latest
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    volumes:
+      - filestore-data:/tmp/filestore
+    depends_on:
+      - postgres
+
   reverseproxy:
+    container_name: binaryrepo-nginx
     image: nginx:latest
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./certs:/certs
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/certs:/certs
     ports:
       - 80:80
       - 443:443
-
-  binaryrepo:
-    image: binaryrepo_binaryrepo
-    build:
-      dockerfile: ./docker/Dockerfile
-      context: .
-    ports:
-      - "2345:2345"
-      - "8081:8081"
-    expose:
-      - "2345"
-    volumes:
-      - .:/src
+    depends_on:
+      - binaryrepo
 
   postgres:
-    container_name: postgres
+    container_name: binaryrepo-postgres
+    command: postgres -c fsync=off -c synchronous_commit=off -c full_page_writes=off -c random_page_cost=1.0
     image: postgres:latest
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
-    volumes:
-      - postgres:/var/lib/postgresql/data
+    tmpfs:
+      - /var/lib/postgresql/data
+    networks:
+      - default
+
 volumes:
-  postgres:
+  filestore-data:

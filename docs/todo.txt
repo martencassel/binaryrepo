@@ -1,0 +1,60 @@
+docker logout docker-local.binaryrepo.local
+docker login docker-local.binaryrepo.local -u admin
+Password: admin
+docker image push docker-local.binaryrepo.local/alpine:latest
+
+- Client checks for existing layer
+
+* Client sends HEAD https://docker-local.binaryrepo.local/v2/alpine/blobs/sha256:df9b9388f04ad6279a7410b85cedfdcb2208c0a003da7ab5613af71079148139
+* Server performs
+
+If the layer widh the digest specified exists, a 200 OK response will be returned to client,
+with no actual body.
+
+200 OK
+Content-Length: <length of blob>
+Docker-Content-Digest: <digest>
+
+If the layer does not exists on server, a 404 response will be returned to client.
+
+- Client starts the upload using POST /upload with empty body
+Server returns upload id, <uuid>
+
+* Server returns
+202 Accepted
+
+* Client starts layer upload and  sends PATCH  using upload <uuid>
+
+https://docker-local.binaryrepo.local/v2/alpine/blobs/uploads/<uuid>
+Body: blob
+
+
+Check for existing blob layer:
+
+Client asks server if a layer with a specific digest exists on the server not.
+
+1. Server looks up digest for blob in its filestore, if found then informs the client, otherwise return a 404.
+
+Initiate upload:
+
+Client asks server that it wants to initiate a blob layer upload, it aquires a upload <uuid>.
+
+1. An upload folder is created for the repository with path _uploads/ in the repository.
+2. A upload uuid is created and saves as a file to the upload folder, _uploads/<uuid> as an empty file.
+3. Server returns the upload uuid to the client
+
+Chunked upload:
+
+Client starts the layer upload process using the previous aquired upload uuid.
+Client sends a PATCH /v2/<name>/blobs/uploads/<uuid> with the body containing the layer chunk binary data.
+Server recieves this file, checks if the uuid is for a valid upload, looks in _uploads/<uuid>, if this file is found,
+then accepts the file and saves it into its filestore.
+Server then informs client that it has accepted the client upload file.
+
+Complete upload:
+
+Client completes the upload proces. PUT /v2/<name>/blobs/uploads/<uuid>?digest=<digest>
+A empty body, complete and validat the upload.
+Server
+
+

@@ -21,10 +21,22 @@ By setting up a shared cache on the local network it may serve many users so tha
 resused a number of times, reducing network traffic and latency.
 ## Features
 
-* Remote docker repos, ie. caching proxy for remote repos in docker registries
-* Local docker repos (A Docker Registry v2)
-* Store files using checksums.
-* Manage repos using an API (TODO)
+* Local docker registry (Docker Registry v2) with basic auth support
+* Checksum based file management (filestore)
+* Metadata management (file metdata management) in postgres.
+* User store in postgres (password stored as hash)
+* Postgres support (schema management, data access layer) 
+
+In-progress
+
+* Docker Remote proxying
+* Management REST API (demo UX) 
+
+Todo
+
+* Support proxying of docker registries (Remote docker repos)
+* Support helm packaging (remotes, locals)
+* Support generic http file management (remotes, local
 
 ## Demo
 
@@ -50,7 +62,7 @@ Build:
 docker-compose build
 ```
 
-Start nginx and binaryrepo
+Start binaryrepo with nginx and postgres
 ```bash
 docker-compose up -d
 ```
@@ -59,19 +71,35 @@ docker-compose up -d
 
 ## Local docker repository
 
+Login with default admin user
+```bash
+docker login api.binaryrepo.local -u admin
+Password: admin
+```
+
 Create a local docker repository
 ```bash
-curl -k --header "Content-Type: application/json" \
+curl -vv -u admin:admin -k --header "Content-Type: application/json" \
   --request POST \
-  --data '{"name":"docker-local", "repo_type":"local","package_type":"docker"'\
+  --data '{"name":"docker-local", "repo_type":"local","pkg_type":"docker"}'\
   https://api.binaryrepo.local/api/repo
 ```
 
-Push an image to the local docker repo:
+List repos
 ```bash
-docker image pull redis:latest
-docker image tag redis:latest docker-local.binaryrepo.local/redis:latest
-docker image push docker-local.binaryrepo.local/redis:latest
+curl -u admin:admin -k https://api.binaryrepo.local/api/repo|jq
+```
+
+Push an image to the docker-local repo
+```bash
+docker image pull alpine:latest
+docker image tag alpine:latest docker-local.binaryrepo.local/alpine:latest
+docker image tag alpine:latest docker-local.binaryrepo.local/alpine:tag1
+docker image tag alpine:latest docker-local.binaryrepo.local/alpine:tag2
+docker image tag alpine:latest docker-local.binaryrepo.local/alpine:tag3
+docker image tag alpine:latest docker-local.binaryrepo.local/alpine:tag4
+docker image tag alpine:latest docker-local.binaryrepo.local/alpine:tag5
+docker image push docker-local.binaryrepo.local/alpine -a
 ```
 
 ## Remote docker repository

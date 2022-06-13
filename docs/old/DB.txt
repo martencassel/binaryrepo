@@ -1,0 +1,31 @@
+---------------------[ Client ]----------------------------------------------------------
+
+GET branch/repo/arch/APKINDEX.tar.gz
+
+GET branch/repo/arch/pkgname.tar.gz
+
+---------------------[ Routines ]----------------------------------------------------------
+
+- Routine: Download index or package from upstream repo
+  Input: Filepath to file
+  Output: Downloaded file or 404 not found
+
+- Routine: Check for a newer version of the requested file in the upstream
+  Input: File path to package
+  1. HTTP HEAD request to get e-tag
+  2. Use e-tag to lookup package or index in database
+    2.1 If e-tag was found, return false (There is no newer version of this file in upstream)
+    2.2 If e-tag was different, return true (There is a newer version of this file in the upstream)
+
+- Routine: Determine if file is APKINDEX or apk package
+  Input: a file
+  Output: APKINDEX or PACKAGE
+
+- Routine: Add or update package to local cache
+  Input: Downloaded file and e-tag
+  * Get checksum
+  * Store apk file in filestore using checksum
+  * Parse apk file to get package metadata
+  * Store (file path, e-tag, checksum, package metadata (index or package etc, package version etc) in database
+
+---------------------------------------------------------------------------------------------------------------------------
