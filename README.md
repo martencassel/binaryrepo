@@ -26,6 +26,8 @@ resused a number of times, reducing network traffic and latency.
 * Metadata management (file metdata management) in postgres.
 * User store in postgres (password stored as hash)
 * Postgres support (schema management, data access layer) 
+* Installation using docker-compose
+* Development tooling (VSCode devcontainer, docker-compose)
 
 In-progress
 
